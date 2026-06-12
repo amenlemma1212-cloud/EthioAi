@@ -1,12 +1,15 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
 
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
 # የ API Key ኮዱን ከ Streamlit Secrets ውስጥ በራሱ ይቀበላል
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-flash")
+if "GEMINI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+else:
+    st.error("እባክህ የ Gemini API Key በ Streamlit Secrets ውስጥ አስገባ!")
+    st.stop()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -22,9 +25,21 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
         
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
+        
+        # በቀጥታ በሊንክ ወደ Google የመጠየቂያ መንገድ (ያለ ላይብረሪ)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+        
         try:
-            response = model.generate_content(prompt)
-            ai_reply = response.text
+            response = requests.post(url, headers=headers, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                ai_reply = result['candidates'][0]['content']['parts'][0]['text']
+            else:
+                ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {response.status_code}"
         except Exception as e:
             ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {e}"
             
