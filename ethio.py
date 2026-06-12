@@ -1,11 +1,11 @@
 import streamlit as st
 import requests
 import random
-import time
 
+# ለአፕሊኬሽን ፍጹም ተስማሚ እና ቀላል ማዋቀሪያ
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 
-# ⚠️ የ gsk_ ቁልፎችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
+# ⚠️ አቤል ወንድሜ፣ የ gsk_ ቁልፎችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
 KEYS_LIST = [
     "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",
     "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",
@@ -14,11 +14,11 @@ KEYS_LIST = [
 
 GROQ_KEYS = [k.replace('"', '').replace("'", "").strip() for k in KEYS_LIST if k]
 
-# --- ጥቁር እና ሰማያዊ (Black & Blue) የ CSS ዲዛይን ---
+# --- ሰርቨር 500 እንዳያመጣ በጣም ቀላል የተደረገ የጥቁር እና ሰማያዊ ዲዛይን ---
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1e293b 100%);
+        background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
         color: #e2e8f0;
     }
     .stChatInputContainer {
@@ -30,6 +30,7 @@ st.markdown("""
     h1 {
         color: #38bdf8 !important;
     }
+    /* የባንዲራ ቀለማት ፍሬም */
     .stApp::before {
         content: "";
         position: fixed;
@@ -37,7 +38,7 @@ st.markdown("""
         left: 0;
         width: 6px;
         height: 100%;
-        background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
+        background: linear-gradient(to bottom, #009A44, #FECB00, #EF2B2D);
         z-index: 9999;
     }
     .stApp::after {
@@ -47,7 +48,7 @@ st.markdown("""
         right: 0;
         width: 6px;
         height: 100%;
-        background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
+        background: linear-gradient(to bottom, #009A44, #FECB00, #EF2B2D);
         z-index: 9999;
     }
 </style>
@@ -70,11 +71,11 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # 🚀 እዚህ ጋር የነበረው ስህተት አሁን በትንሿ "st" ተስተካክሏል!
+        # ሰርቨሩን 500 እንዳያደርገው spinner ብቻ ተጠቀምን (የከበዱ አኒሜሽኖችን አውጥተናል)
         with st.spinner("EthioAi..."):
             url = "https://api.groq.com/openai/v1/chat/completions"
             
-            api_messages = [{"role": "system", "content": "You are EthioAi, a smart and professional AI assistant created by Abel."}]
+            api_messages = [{"role": "system", "content": "You are EthioAi, a smart AI assistant created by Abel."}]
             for msg in st.session_state.messages:
                 api_messages.append({"role": msg["role"], "content": msg["content"]})
                 
@@ -93,7 +94,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
                     "Content-Type": "application/json"
                 }
                 try:
-                    response = requests.post(url, headers=headers, json=payload, timeout=20)
+                    response = requests.post(url, headers=headers, json=payload, timeout=25)
                     if response.status_code == 200:
                         result = response.json()
                         ai_reply = result["choices"][0]["message"]["content"]
@@ -104,12 +105,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             if not ai_reply:
                 ai_reply = "ይቅርታ፣ አሁን ሰርቨር ስራ በዝቶበታል። እባክህ ድጋሚ ሞክር።"
         
-        full_response = ""
-        for word in ai_reply.split(" "):
-            full_response += word + " "
-            time.sleep(0.01)
-            message_placeholder.markdown(full_response + "▌")
-            
-        message_placeholder.markdown(full_response)
+        # ለስልክ አፕ በጣም ፈጣንና ቀጥታ መልስ ማሳያ
+        message_placeholder.markdown(ai_reply)
         
     st.session_state.messages.append({"role": "assistant", "content": ai_reply})
