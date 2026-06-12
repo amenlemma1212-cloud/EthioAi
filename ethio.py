@@ -108,4 +108,4 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
         # ለስልክ አፕ በጣም ፈጣንና ቀጥታ መልስ ማሳያ
         message_placeholder.markdown(ai_reply)
         
-    st.session_state.messages.append({"role": "assistant", "content": ai_reply}) 
+    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
