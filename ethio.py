@@ -4,8 +4,12 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# አቤል ወንድሜ፣ ያንተን የ Gemini API Key እዚህ ውስጥ ብቻ በጥንቃቄ ለጥፈው
-MY_KEY = "AQ.Ab8RN6JgfoKtegCAj3EEpXYbtr-BvqhFIrIzvzK5qisDY9O3Kg"
+# አቤል ወንድሜ፣ እዚህ ጋር የጥቅስ ምልክቶቹን እንዳታጠፋቸው!
+# ያንተን AIzaSy ብሎ የሚጀምረውን ኮድ ብቻ እዚህ መሃል በጥንቃቄ ለጥፈው።
+RAW_KEY = "AQ.Ab8RN6JgfoKtegCAj3EEpXYbtr-BvqhFIrIzvzK5qisDY9O3Kg"
+
+# ክፍት ቦታ ወይም ሌላ አላስፈላጊ ነገር ካለ የሚያጸዳ
+API_KEY = RAW_KEY.strip()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -22,15 +26,17 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # ቁልፉን በቀጥታ ወደ ሊንኩ አስገብተነዋል
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={MY_KEY}"
-        headers = {'Content-Type': 'application/json'}
+        # ሊንኩን እጅግ በጣም ንጹሕ አድርገን ለይተን እንጽፈዋለን
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        params = {"key": API_KEY}
+        headers = {"Content-Type": "application/json"}
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
         }
         
         try:
-            response = requests.post(url, headers=headers, json=payload)
+            # params=params በመጠቀም ቁልፉን በንጽሕና ይልከዋል
+            response = requests.post(url, headers=headers, json=payload, params=params)
             if response.status_code == 200:
                 result = response.json()
                 ai_reply = result['candidates'][0]['content']['parts'][0]['text']
