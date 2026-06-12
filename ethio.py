@@ -4,13 +4,13 @@ import google.generativeai as genai
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# አቤል ወንድሜ፣ ያንተን የ Gemini API Key እዚህ ውስጥ ብቻ አስገባው
-API_KEY = "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w"
+# ያንተን የ Gemini API Key እዚህ ውስጥ አስገባው
+API_KEY = "እዚህ ጋር ያንተን ረጅሙን የAPI_KEY ኮድ አስገባ"
 
-# AIውን በቀጥታ ማገናኛ
+# እዚህ ጋር ወደ gemini-pro ቀይረነዋል አቤል!
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
 model = genai.GenerativeModel("gemini-pro")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
