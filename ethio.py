@@ -19,7 +19,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # ያለምንም API Key እና የሀገር ገደብ የሚሠራ እውነተኛ AI መስመር
+        # ያለምንም የሀገር ገደብ ለሁሉም ሰው የሚሠራ እውነተኛ AI
         url = "https://open-api.koyeb.app/v1/chat/completions"
         headers = {"Content-Type": "application/json"}
         payload = {
@@ -36,9 +36,9 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
                 result = response.json()
                 ai_reply = result["choices"][0]["message"]["content"]
             else:
-                ai_reply = "ይቅርታ አቤል ወንድሜ፣ ሰርቨሩ ስራ በዝቶበታል። እባክህ አንዴ ድጋሚ ሞክር።"
+                ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
         except Exception as e:
-            ai_reply = "ይቅርታ፣ ከኔትወርክ ጋር መገናኘት አልቻልኩም። እባክህ ገጹን Refresh አድርገው።"
+            ai_reply = "ይቅርታ፣ ከኔትወርክ ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
             
         message_placeholder.markdown(ai_reply)
         
