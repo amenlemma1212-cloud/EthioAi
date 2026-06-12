@@ -4,7 +4,6 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# የ API Key ኮዱን ከ Streamlit Secrets ውስጥ በራሱ ይቀበላል
 if "GEMINI_API_KEY" in st.secrets:
     API_KEY = st.secrets["GEMINI_API_KEY"]
 else:
@@ -26,7 +25,6 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # በቀጥታ በሊንክ ወደ Google የመጠየቂያ መንገድ (ያለ ላይብረሪ)
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
         headers = {'Content-Type': 'application/json'}
         payload = {
