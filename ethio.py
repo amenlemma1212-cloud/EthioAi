@@ -7,9 +7,8 @@ st.title("🤖 EthioAi")
 # ያንተን የ Gemini API Key እዚህ ውስጥ አስገባው
 API_KEY = "እዚህ ጋር ያንተን ረጅሙን የAPI_KEY ኮድ አስገባ"
 
-# እዚህ ጋር ወደ gemini-pro ቀይረነዋል አቤል!
+# አዲሱ አስተማማኝ ማገናኛ መንገድ
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-pro")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -26,7 +25,14 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         try:
-            response = model.generate_content(prompt)
+            # ለድሮውም ለአዲሱም ላይብረሪ በሚሠራ መንገድ መልስ መቀበያ
+            try:
+                model = genai.GenerativeModel("gemini-1.5-flash")
+                response = model.generate_content(prompt)
+            except:
+                model = genai.GenerativeModel("gemini-pro")
+                response = model.generate_content(prompt)
+                
             ai_reply = response.text
         except Exception as e:
             ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {e}"
