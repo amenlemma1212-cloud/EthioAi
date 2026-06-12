@@ -19,10 +19,9 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # ያለምንም የሀገር ገደብ ለሁሉም ሰው የሚሠራ እውነተኛ AI
-        url = "https://open-api.koyeb.app/v1/chat/completions"
-        headers = {"Content-Type": "application/json"}
-        payload = {
+        # ሰርቨር 1 (ዋናው ሰርቨር)
+        url1 = "https://open-api.koyeb.app/v1/chat/completions"
+        payload1 = {
             "model": "gpt-4o-mini",
             "messages": [
                 {"role": "system", "content": "You are EthioAi, a smart and helpful AI assistant created by Abel."},
@@ -30,15 +29,36 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             ]
         }
         
+        # ሰርቨር 2 (የመጠባበቂያ ሰርቨር - ሰርቨር 1 ስራ ቢበዛበት ይህ ይሠራል)
+        url2 = "https://chateverywhere.v7x.workers.dev/api/chat"
+        payload2 = {
+            "model": "gpt-4o-mini",
+            "messages": [{"role": "user", "content": prompt}]
+        }
+        
+        ai_reply = ""
+        
+        # መጀመሪያ ዋናውን ሰርቨር መሞከር
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=15)
+            response = requests.post(url1, json=payload1, timeout=20)
             if response.status_code == 200:
                 result = response.json()
                 ai_reply = result["choices"][0]["message"]["content"]
-            else:
-                ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
-        except Exception as e:
-            ai_reply = "ይቅርታ፣ ከኔትወርክ ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
+        except:
+            pass
+            
+        # ዋናው ሰርቨር ከሸሸገ መጠባበቂያውን ሰርቨር መሞከር
+        if not ai_reply:
+            try:
+                response = requests.post(url2, json=payload2, timeout=20)
+                if response.status_code == 200:
+                    ai_reply = response.text
+            except:
+                pass
+                
+        # ሁለቱም እምቢ ካሉ የሚመጣ መልዕክት
+        if not ai_reply:
+            ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
             
         message_placeholder.markdown(ai_reply)
         
