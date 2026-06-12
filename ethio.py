@@ -4,11 +4,8 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-if "GEMINI_API_KEY" in st.secrets:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-else:
-    st.error("እባክህ የ Gemini API Key በ Streamlit Secrets ውስጥ አስገባ!")
-    st.stop()
+# አቤል ወንድሜ፣ ያንተን የ Gemini API Key እዚህ ውስጥ ብቻ በጥንቃቄ ለጥፈው
+MY_KEY = "እዚህ ጋር ያንተን ረጅሙን የAPI_KEY ኮድ አስገባ"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -25,7 +22,8 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        # ቁልፉን በቀጥታ ወደ ሊንኩ አስገብተነዋል
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={MY_KEY}"
         headers = {'Content-Type': 'application/json'}
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
@@ -37,7 +35,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
                 result = response.json()
                 ai_reply = result['candidates'][0]['content']['parts'][0]['text']
             else:
-                ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {response.status_code}"
+                ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {response.status_code} - {response.text}"
         except Exception as e:
             ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {e}"
             
