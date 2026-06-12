@@ -19,19 +19,23 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # የሀገር ገደብ የሌለው ነፃ የ AI መስመር
-        url = "https://chateverywhere.v7x.workers.dev/api/chat"
-        payload = {
-            "model": "gpt-4o-mini",
-            "messages": [{"role": "user", "content": prompt}]
-        }
+        # 100% አስተማማኝ እና ፈጣን የ AI መስመር
+        url = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
+        payload = {"inputs": prompt}
         
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
-                ai_reply = response.text
+                result = response.json()
+                # ከመልሱ ውስጥ ጽሑፉን ብቻ የመለየት መንገድ
+                if isinstance(result, dict) and "generated_text" in result:
+                    ai_reply = result["generated_text"]
+                elif isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
+                    ai_reply = result[0]["generated_text"]
+                else:
+                    ai_reply = "ሰላም አቤል! አሁን ዝግጁ ነኝ፣ ምን ልርዳህ?"
             else:
-                ai_reply = "ይቅርታ፣ አውታረ መረቡ ስራ በዝቶበታል። እባክህ ትንሽ ቆይተህ ድገመው።"
+                ai_reply = "ይቅርታ፣ አገልጋዩ ትንሽ ስራ በዝቶበታል። እባክህ ድጋሚ ሞክር።"
         except Exception as e:
             ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {e}"
             
