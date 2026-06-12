@@ -7,9 +7,9 @@ st.title("🤖 EthioAi")
 
 # የ Google Gemini AI ነፃ ቁልፍ (API Key) ማገናኛ
 # አቤል ወንድሜ፣ እዚህ ሳጥን ውስጥ ያንተን የ Gemini API Key ታስገባለህ
-API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+API_KEY = "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w"
 
-if API_KEY != "YOUR_GEMINI_API_KEY_HERE":
+if API_KEY != "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w":
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel("gemini-1.5-flash")
 else:
