@@ -4,7 +4,7 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# ⚠️ አቤል ወንድሜ፣ ከ Groq ያመጣኸውን የ gsk_ ቁልፍ እዚህ መሃል ብቻ በጥንቃቄ ለጥፈው
+# ⚠️ አቤል ወንድሜ፣ ያንን የ Groq gsk_ ቁልፍህን እዚህ መሃል ብቻ በጥንቃቄ ለጥፈው
 GROQ_API_KEY = "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"
 
 if "messages" not in st.session_state:
@@ -22,10 +22,9 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # የዓለማችን ፈጣኑ እና የማይዘጋው የ Groq AI ሰርቨር
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {GROQ_API_KEY.strip()}",
             "Content-Type": "application/json"
         }
         payload = {
@@ -37,7 +36,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
         }
         
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=15)
+            response = requests.post(url, headers=headers, json=payload, timeout=20)
             if response.status_code == 200:
                 result = response.json()
                 ai_reply = result["choices"][0]["message"]["content"]
@@ -48,4 +47,4 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             
         message_placeholder.markdown(ai_reply)
         
-    st.session_state.messages.append({"role": "assistant", "content": ai_reply}) 
+    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
