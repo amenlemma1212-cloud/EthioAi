@@ -4,10 +4,13 @@ import google.generativeai as genai
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# አቤል ወንድሜ፣ በጥንቃቄ የጥቅስ ምልክቶቹ መሃል ያንተን ኮድ ብቻ አስገባው
-API_KEY = "AQ.Ab8RN6JgfoKtegCAj3EEpXYbtr-BvqhFIrIzvzK5qisDY9O3Kg"
-
-genai.configure(api_key=API_KEY)
+# የ API Key ኮዱን ከ Streamlit Secrets ውስጥ በደህንነት ይቀበላል
+if "GEMINI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=API_KEY)
+else:
+    st.error("እባክህ የ Gemini API Key በ Streamlit Secrets ውስጥ አስገባ!")
+    st.stop()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
