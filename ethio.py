@@ -4,10 +4,9 @@ import google.generativeai as genai
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# ያንተን የ Gemini API Key እዚህ ውስጥ አስገባው
-API_KEY = "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w"
+# አቤል ወንድሜ፣ በጥንቃቄ የጥቅስ ምልክቶቹ መሃል ያንተን ኮድ ብቻ አስገባው
+API_KEY = "AQ.Ab8RN6JgfoKtegCAj3EEpXYbtr-BvqhFIrIzvzK5qisDY9O3Kg"
 
-# Python 3.11 ላይ በቀጥታ ከ Google ጋር ማገናኛ
 genai.configure(api_key=API_KEY)
 
 if "messages" not in st.session_state:
@@ -25,7 +24,6 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         try:
-            # በ Python 3.11 ላይ በደንብ የሚሠራው ሞዴል
             model = genai.GenerativeModel("gemini-pro")
             response = model.generate_content(prompt)
             ai_reply = response.text
