@@ -4,10 +4,9 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# ⚠️ አቤል ወንድሜ፣ እዚህ ጥቅስ ምልክቱ ውስጥ ያንተን የ gsk_ ኮድ ብቻ በጥንቃቄ አስገባ
+# ⚠️ አቤል ወንድሜ፣ ያንን የ gsk_ ቁልፍህን እዚህ መሃል ብቻ በጥንቃቄ አስገባ
 RAW_KEY = "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"
 
-# ማንኛውንም ክፍት ቦታ ወይም ስህተት የሚያጸዳ
 GROQ_API_KEY = RAW_KEY.replace('"', '').replace("'", "").strip()
 
 if "messages" not in st.session_state:
@@ -30,8 +29,10 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json"
         }
+        
+        # 🚀 400 ኤረርን የሚያጠፋው አዲሱ የ Groq ሞዴል ስም እዚህ ጋር ተስተካክሏል
         payload = {
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-8b-instant",
             "messages": [
                 {"role": "system", "content": "You are EthioAi, a smart and professional AI assistant created by Abel."},
                 {"role": "user", "content": prompt}
@@ -44,7 +45,6 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
                 result = response.json()
                 ai_reply = result["choices"][0]["message"]["content"]
             else:
-                # ሰርቨሩ በትክክል ያልሠራበትን እውነተኛ ምክንያት ለማወቅ (ለማስተካከል ይጠቅማል)
                 ai_reply = f"የሰርቨር ስህተት ቁጥር፦ {response.status_code}"
         except Exception as e:
             ai_reply = "ከኢንተርኔት ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
