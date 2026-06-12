@@ -14,12 +14,24 @@ KEYS_LIST = [
 
 GROQ_KEYS = [k.replace('"', '').replace("'", "").strip() for k in KEYS_LIST if k]
 
-# --- ለአፕሊኬሽን የሚሆን አዲስና ቀላል የባንዲራ ፍሬም ዲዛይን (CSS) ---
+# --- ጥቁር እና ሰማያዊ (Black & Blue) ለአፕሊኬሽን የሚሆን የ CSS ዲዛይን ---
 st.markdown("""
 <style>
-    /* አፑን ውብ የሚያደርግ የጀርባ ቀለም */
+    /* ዋናው ባክግራውንድ ወደ ጥቁር እና ሰማያዊ የተቀየረበት ኮድ */
     .stApp {
-        background-color: #f4f6f7;
+        background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1e293b 100%);
+        color: #e2e8f0;
+    }
+    
+    /* የጽሕፈት ሳጥኑን እና ፅሁፎችን ወደ ጥቁር ሞድ ማስተካከያ */
+    .stChatInputContainer {
+        background-color: #1e293b !important;
+    }
+    textarea {
+        color: #ffffff !important;
+    }
+    h1 {
+        color: #38bdf8 !important; /* ሰማያዊ አርዕስት */
     }
     
     /* በግራ እና በቀኝ በኩል የኢትዮጵያን ባንዲራ የሚያሳዩ ቀጫጭን መስመሮች */
@@ -28,7 +40,7 @@ st.markdown("""
         position: fixed;
         top: 0;
         left: 0;
-        width: 8px;
+        width: 6px;
         height: 100%;
         background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
         z-index: 9999;
@@ -38,27 +50,14 @@ st.markdown("""
         position: fixed;
         top: 0;
         right: 0;
-        width: 8px;
+        width: 6px;
         height: 100%;
         background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
         z-index: 9999;
     }
-    
-    /* ከላይ ያለችው ዋና የባንዲራ መስመር */
-    .flag-top {
-        height: 5px;
-        width: 100%;
-        display: flex;
-        margin-bottom: 20px;
-    }
-    .green { background-color: #009A44; flex: 1; }
-    .yellow { background-color: #FECB00; flex: 1; }
-    .red { background-color: #EF2B2D; flex: 1; }
 </style>
 """, unsafe_allow_html=True)
 
-# ከላይ የባንዲራ መስመር ያሳያል
-st.markdown('<div class="flag-top"><div class="green"></div><div class="yellow"></div><div class="red"></div></div>', unsafe_allow_html=True)
 st.title("🤖 EthioAi")
 
 # የቆየ ወሬ ማስታወሻ (Chat History)
@@ -77,7 +76,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        with st.spinner("EthioAi..."):
+        with St.spinner("EthioAi..."):
             url = "https://api.groq.com/openai/v1/chat/completions"
             
             api_messages = [{"role": "system", "content": "You are EthioAi, a smart and professional AI assistant created by Abel."}]
@@ -110,7 +109,6 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             if not ai_reply:
                 ai_reply = "ይቅርታ፣ አሁን ሰርቨር ስራ በዝቶበታል። እባክህ ድጋሚ ሞክር።"
         
-        # ለአሮጌ ስልኮች የሚሆን ፈጣን አኒሜሽን
         full_response = ""
         for word in ai_reply.split(" "):
             full_response += word + " "
