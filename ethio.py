@@ -3,10 +3,9 @@ import requests
 import random
 import time
 
-# ለአፕሊኬሽን በሚስማማ መልኩ ገጹን ማስተካከል
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 
-# ⚠️ አቤል ወንድሜ፣ ያወጣሃቸውን 3 የ gsk_ ቁልፎች እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
+# ⚠️ አቤል ወንድሜ፣ የ gsk_ ቁልፎችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
 KEYS_LIST = [
     "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",
     "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",
@@ -15,21 +14,42 @@ KEYS_LIST = [
 
 GROQ_KEYS = [k.replace('"', '').replace("'", "").strip() for k in KEYS_LIST if k]
 
-# --- ለአሮጌ ስልኮች WebView የሚስማማ በጣም ቀሊል ዲዛይን (CSS) ---
+# --- ለአፕሊኬሽን የሚሆን አዲስና ቀላል የባንዲራ ፍሬም ዲዛይን (CSS) ---
 st.markdown("""
 <style>
-    /* ስልኩን እንዳይጭንቅ ባክግራውንዱን ወደ መደበኛ ክሬም/ነጭ ቀለም ቀየርነው */
+    /* አፑን ውብ የሚያደርግ የጀርባ ቀለም */
     .stApp {
-        background-color: #f7f9fa;
+        background-color: #f4f6f7;
     }
-    /* የኢትዮጵያ ባንዲራ መስመር ከላይ ማሳያ */
-    .flag-bar {
-        height: 6px;
+    
+    /* በግራ እና በቀኝ በኩል የኢትዮጵያን ባንዲራ የሚያሳዩ ቀጫጭን መስመሮች */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 100%;
+        background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
+        z-index: 9999;
+    }
+    .stApp::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 8px;
+        height: 100%;
+        background: linear-gradient(to bottom, #009A44 0%, #FECB00 50%, #EF2B2D 100%);
+        z-index: 9999;
+    }
+    
+    /* ከላይ ያለችው ዋና የባንዲራ መስመር */
+    .flag-top {
+        height: 5px;
         width: 100%;
         display: flex;
-        border-radius: 3px;
-        overflow: hidden;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     .green { background-color: #009A44; flex: 1; }
     .yellow { background-color: #FECB00; flex: 1; }
@@ -37,8 +57,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ከላይ የባንዲራዋን መስመር ያሳያል
-st.markdown('<div class="flag-bar"><div class="green"></div><div class="yellow"></div><div class="red"></div></div>', unsafe_allow_html=True)
+# ከላይ የባንዲራ መስመር ያሳያል
+st.markdown('<div class="flag-top"><div class="green"></div><div class="yellow"></div><div class="red"></div></div>', unsafe_allow_html=True)
 st.title("🤖 EthioAi")
 
 # የቆየ ወሬ ማስታወሻ (Chat History)
@@ -90,7 +110,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             if not ai_reply:
                 ai_reply = "ይቅርታ፣ አሁን ሰርቨር ስራ በዝቶበታል። እባክህ ድጋሚ ሞክር።"
         
-        # ለአሮጌ ስልኮች እንዲስማማ አኒሜሽኑን በጣም ፈጣን አደረግነው
+        # ለአሮጌ ስልኮች የሚሆን ፈጣን አኒሜሽን
         full_response = ""
         for word in ai_reply.split(" "):
             full_response += word + " "
