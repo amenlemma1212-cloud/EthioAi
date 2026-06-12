@@ -4,10 +4,12 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
+# ⚠️ አቤል ወንድሜ፣ ያንን የ Hugging Face hf_ ቁልፍህን እዚህ መሃል ብቻ በትክክል አቆየው
+HF_TOKEN = "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"
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
-# ጥቅስ ምልክቶቹ "" መኖራቸውን እንዳትረሳ ወንድሜ!
-HF_TOKEN = "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"
+
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -20,44 +22,46 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # ሰርቨር 1 (ዋናው ሰርቨር)
-        url1 = "https://open-api.koyeb.app/v1/chat/completions"
-        payload1 = {
-            "model": "gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": "You are EthioAi, a smart and helpful AI assistant created by Abel."},
-                {"role": "user", "content": prompt}
-            ]
-        }
-        
-        # ሰርቨር 2 (የመጠባበቂያ ሰርቨር - ሰርቨር 1 ስራ ቢበዛበት ይህ ይሠራል)
-        url2 = "https://chateverywhere.v7x.workers.dev/api/chat"
-        payload2 = {
-            "model": "gpt-4o-mini",
-            "messages": [{"role": "user", "content": prompt}]
-        }
-        
+        headers = {"Authorization": f"Bearer {HF_TOKEN}"}
         ai_reply = ""
         
-        # መጀመሪያ ዋናውን ሰርቨር መሞከር
+        # --- ሰርቨር 1: Meta Llama 3 (ዋናው AI) ---
+        url1 = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
+        payload1 = {
+            "inputs": f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+            "parameters": {"max_new_tokens": 500, "return_full_text": False}
+        }
+        
         try:
-            response = requests.post(url1, json=payload1, timeout=20)
+            response = requests.post(url1, headers=headers, json=payload1, timeout=12)
             if response.status_code == 200:
                 result = response.json()
-                ai_reply = result["choices"][0]["message"]["content"]
+                if isinstance(result, list) and len(result) > 0:
+                    ai_reply = result[0].get("generated_text", "")
+                elif isinstance(result, dict):
+                    ai_reply = result.get("generated_text", "")
         except:
-            pass
+            pass  # የመጀመሪያው ካልሠራ ወደ ሁለተኛው ያልፋል
             
-        # ዋናው ሰርቨር ከሸሸገ መጠባበቂያውን ሰርቨር መሞከር
+        # --- ሰርቨር 2: Microsoft Phi 3 (መጠባበቂያ AI - 1ኛው Full ሲሆን ይህ ይተካል) ---
         if not ai_reply:
+            url2 = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
+            payload2 = {
+                "inputs": f"<|user|>\n{prompt}<|end|>\n<|assistant|>",
+                "parameters": {"max_new_tokens": 500, "return_full_text": False}
+            }
             try:
-                response = requests.post(url2, json=payload2, timeout=20)
+                response = requests.post(url2, headers=headers, json=payload2, timeout=12)
                 if response.status_code == 200:
-                    ai_reply = response.text
+                    result = response.json()
+                    if isinstance(result, list) and len(result) > 0:
+                        ai_reply = result[0].get("generated_text", "")
+                    elif isinstance(result, dict):
+                        ai_reply = result.get("generated_text", "")
             except:
                 pass
                 
-        # ሁለቱም እምቢ ካሉ የሚመጣ መልዕክት
+        # --- ሁለቱም ሰርቨሮች በጣም ስራ ከበዛባቸው ብቻ የሚመጣ መልእክት ---
         if not ai_reply:
             ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
             
