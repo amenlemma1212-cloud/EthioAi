@@ -10,7 +10,7 @@ API_KEY = "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w"
 # AIውን በቀጥታ ማገናኛ
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
-
+model = genai.GenerativeModel("gemini-pro")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
