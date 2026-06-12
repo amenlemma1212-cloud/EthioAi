@@ -48,4 +48,4 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
             
         message_placeholder.markdown(ai_reply)
         
-    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+    st.session_state.messages.append({"role": "assistant", "content": ai_reply}) 
