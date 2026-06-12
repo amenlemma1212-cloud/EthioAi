@@ -5,7 +5,7 @@ import time
 
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 
-# ⚠️ አቤል ወንድሜ፣ የ gsk_ ቁልፎችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
+# ⚠️ የ gsk_ ቁልፎችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
 KEYS_LIST = [
     "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",
     "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",
@@ -14,16 +14,13 @@ KEYS_LIST = [
 
 GROQ_KEYS = [k.replace('"', '').replace("'", "").strip() for k in KEYS_LIST if k]
 
-# --- ጥቁር እና ሰማያዊ (Black & Blue) ለአፕሊኬሽን የሚሆን የ CSS ዲዛይን ---
+# --- ጥቁር እና ሰማያዊ (Black & Blue) የ CSS ዲዛይን ---
 st.markdown("""
 <style>
-    /* ዋናው ባክግራውንድ ወደ ጥቁር እና ሰማያዊ የተቀየረበት ኮድ */
     .stApp {
         background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1e293b 100%);
         color: #e2e8f0;
     }
-    
-    /* የጽሕፈት ሳጥኑን እና ፅሁፎችን ወደ ጥቁር ሞድ ማስተካከያ */
     .stChatInputContainer {
         background-color: #1e293b !important;
     }
@@ -31,10 +28,8 @@ st.markdown("""
         color: #ffffff !important;
     }
     h1 {
-        color: #38bdf8 !important; /* ሰማያዊ አርዕስት */
+        color: #38bdf8 !important;
     }
-    
-    /* በግራ እና በቀኝ በኩል የኢትዮጵያን ባንዲራ የሚያሳዩ ቀጫጭን መስመሮች */
     .stApp::before {
         content: "";
         position: fixed;
@@ -60,7 +55,6 @@ st.markdown("""
 
 st.title("🤖 EthioAi")
 
-# የቆየ ወሬ ማስታወሻ (Chat History)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -76,7 +70,8 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        with St.spinner("EthioAi..."):
+        # 🚀 እዚህ ጋር የነበረው ስህተት አሁን በትንሿ "st" ተስተካክሏል!
+        with st.spinner("EthioAi..."):
             url = "https://api.groq.com/openai/v1/chat/completions"
             
             api_messages = [{"role": "system", "content": "You are EthioAi, a smart and professional AI assistant created by Abel."}]
