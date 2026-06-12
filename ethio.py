@@ -4,8 +4,11 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# ⚠️ አቤል ወንድሜ፣ ያንን የ Groq gsk_ ቁልፍህን እዚህ መሃል ብቻ በጥንቃቄ ለጥፈው
-GROQ_API_KEY = "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"
+# ⚠️ አቤል ወንድሜ፣ እዚህ ጥቅስ ምልክቱ ውስጥ ያንተን የ gsk_ ኮድ ብቻ በጥንቃቄ አስገባ
+RAW_KEY = "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"
+
+# ማንኛውንም ክፍት ቦታ ወይም ስህተት የሚያጸዳ
+GROQ_API_KEY = RAW_KEY.replace('"', '').replace("'", "").strip()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -24,7 +27,7 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
         
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY.strip()}",
+            "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json"
         }
         payload = {
@@ -36,14 +39,15 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
         }
         
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=20)
+            response = requests.post(url, headers=headers, json=payload, timeout=25)
             if response.status_code == 200:
                 result = response.json()
                 ai_reply = result["choices"][0]["message"]["content"]
             else:
-                ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
+                # ሰርቨሩ በትክክል ያልሠራበትን እውነተኛ ምክንያት ለማወቅ (ለማስተካከል ይጠቅማል)
+                ai_reply = f"የሰርቨር ስህተት ቁጥር፦ {response.status_code}"
         except Exception as e:
-            ai_reply = "ይቅርታ፣ ከኔትወርክ ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
+            ai_reply = "ከኢንተርኔት ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
             
         message_placeholder.markdown(ai_reply)
         
