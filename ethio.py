@@ -5,7 +5,7 @@ st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
 # አቤል ወንድሜ፣ ያንተን የ Gemini API Key እዚህ ውስጥ ብቻ በጥንቃቄ ለጥፈው
-MY_KEY = "እዚህ ጋር ያንተን ረጅሙን የAPI_KEY ኮድ አስገባ"
+MY_KEY = "AQ.Ab8RN6JgfoKtegCAj3EEpXYbtr-BvqhFIrIzvzK5qisDY9O3Kg"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
