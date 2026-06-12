@@ -4,8 +4,8 @@ import requests
 st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
-# ⚠️ አቤል ወንድሜ፣ ያንን የ Hugging Face hf_ ቁልፍህን እዚህ መሃል ብቻ በትክክል አቆየው
-HF_TOKEN = "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"
+# ⚠️ አቤል ወንድሜ፣ ከ Groq ያመጣኸውን የ gsk_ ቁልፍ እዚህ መሃል ብቻ በጥንቃቄ ለጥፈው
+GROQ_API_KEY = "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"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -22,48 +22,29 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-        ai_reply = ""
-        
-        # --- ሰርቨር 1: Meta Llama 3 (ዋናው AI) ---
-        url1 = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
-        payload1 = {
-            "inputs": f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
-            "parameters": {"max_new_tokens": 500, "return_full_text": False}
+        # የዓለማችን ፈጣኑ እና የማይዘጋው የ Groq AI ሰርቨር
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "llama3-8b-8192",
+            "messages": [
+                {"role": "system", "content": "You are EthioAi, a smart and professional AI assistant created by Abel."},
+                {"role": "user", "content": prompt}
+            ]
         }
         
         try:
-            response = requests.post(url1, headers=headers, json=payload1, timeout=12)
+            response = requests.post(url, headers=headers, json=payload, timeout=15)
             if response.status_code == 200:
                 result = response.json()
-                if isinstance(result, list) and len(result) > 0:
-                    ai_reply = result[0].get("generated_text", "")
-                elif isinstance(result, dict):
-                    ai_reply = result.get("generated_text", "")
-        except:
-            pass  # የመጀመሪያው ካልሠራ ወደ ሁለተኛው ያልፋል
-            
-        # --- ሰርቨር 2: Microsoft Phi 3 (መጠባበቂያ AI - 1ኛው Full ሲሆን ይህ ይተካል) ---
-        if not ai_reply:
-            url2 = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
-            payload2 = {
-                "inputs": f"<|user|>\n{prompt}<|end|>\n<|assistant|>",
-                "parameters": {"max_new_tokens": 500, "return_full_text": False}
-            }
-            try:
-                response = requests.post(url2, headers=headers, json=payload2, timeout=12)
-                if response.status_code == 200:
-                    result = response.json()
-                    if isinstance(result, list) and len(result) > 0:
-                        ai_reply = result[0].get("generated_text", "")
-                    elif isinstance(result, dict):
-                        ai_reply = result.get("generated_text", "")
-            except:
-                pass
-                
-        # --- ሁለቱም ሰርቨሮች በጣም ስራ ከበዛባቸው ብቻ የሚመጣ መልእክት ---
-        if not ai_reply:
-            ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
+                ai_reply = result["choices"][0]["message"]["content"]
+            else:
+                ai_reply = "ይቅርታ፣ የአገልጋይ ስራ መብዛት አጋጥሟል። እባክህ ጥቂት ቆይተህ ድጋሚ ሞክር።"
+        except Exception as e:
+            ai_reply = "ይቅርታ፣ ከኔትወርክ ጋር መገናኘት አልተቻለም። እባክህ ገጹን Refresh አድርገው።"
             
         message_placeholder.markdown(ai_reply)
         
