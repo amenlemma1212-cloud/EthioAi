@@ -5,9 +5,9 @@ st.set_page_config(page_title="EthioAi", page_icon="🤖")
 st.title("🤖 EthioAi")
 
 # ያንተን የ Gemini API Key እዚህ ውስጥ አስገባው
-API_KEY = "እዚህ ጋር ያንተን ረጅሙን የAPI_KEY ኮድ አስገባ"
+API_KEY = "AQ.Ab8RN6Ixqrlk4d7e3MgdPXJE9yWZhSbLHPXXsBgCyO8xwprg7w"
 
-# አዲሱ አስተማማኝ ማገናኛ መንገድ
+# Python 3.11 ላይ በቀጥታ ከ Google ጋር ማገናኛ
 genai.configure(api_key=API_KEY)
 
 if "messages" not in st.session_state:
@@ -25,14 +25,9 @@ if prompt := st.chat_input("EthioAi ን አነጋግረው..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         try:
-            # ለድሮውም ለአዲሱም ላይብረሪ በሚሠራ መንገድ መልስ መቀበያ
-            try:
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                response = model.generate_content(prompt)
-            except:
-                model = genai.GenerativeModel("gemini-pro")
-                response = model.generate_content(prompt)
-                
+            # በ Python 3.11 ላይ በደንብ የሚሠራው ሞዴል
+            model = genai.GenerativeModel("gemini-pro")
+            response = model.generate_content(prompt)
             ai_reply = response.text
         except Exception as e:
             ai_reply = f"ይቅርታ ስህተት ተፈጥሯል፦ {e}"
