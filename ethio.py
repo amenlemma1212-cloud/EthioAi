@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🎨 ያንተን ጽሑፍ ወደ ግራ፣ የ AIውን ወደ ቀኝ ማድረጊያ እና ጠርዞቹን የኩርባ (Curve) ማድረጊያ CSS
+# 🎨 የገጹን ውበት፣ የብርጭቆ ማውጫ፣ የኩርባ ቅርጽ እና አቅጣጫን ያቀፈው የመጨረሻው CSS
 st.markdown(
     """
     <style>
@@ -29,17 +29,17 @@ st.markdown(
         font-weight: bold !important;
     }
     
-    /* 🎬 🔄 ሮቦት (AI) text -> ወደ ቀኝ (Right) እና በጣም ክብ የኩርባ ጠርዝ (Highly Curved) */
+    /* 🤖 🔄 ሮቦት (AI) text -> ወደ ቀኝ (Right) እና በጣም ክብ የኩርባ ጠርዝ */
     div[data-testid="stChatMessageAssistant"] {
         border-right: 5px solid #fed100 !important;
         border-left: none !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
         margin-left: 20% !important;
         margin-right: 0% !important;
-        border-radius: 25px 25px 0px 25px !important; /* 👈 የኩርባ ቅርጽ ማስተካከያ */
+        border-radius: 25px 25px 0px 25px !important;
     }
     
-    /* 👤 🔄 ሰው (Human/User) text -> ወደ ግራ (Left) እና በጣም ክብ የኩርባ ጠርዝ (Highly Curved) */
+    /* 👤 🔄 ሰው (Human/User) text -> ወደ ግራ (Left) እና በጣም ክብ የኩርባ ጠርዝ */
     div[data-testid="stChatMessageUser"] {
         border-left: 5px solid #009c3a !important;
         border-right: none !important;
@@ -47,7 +47,7 @@ st.markdown(
         margin-right: 20% !important;
         margin-left: 0% !important;
         text-align: left !important;
-        border-radius: 25px 25px 25px 0px !important; /* 👈 የኩርባ ቅርጽ ማስተካከያ */
+        border-radius: 25px 25px 25px 0px !important;
     }
     
     /* 🎬 አጠቃላይ የሳጥን ውበት */
@@ -78,6 +78,11 @@ st.markdown(
         border-radius: 35px !important;
         background-color: #ffffff !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    div[data-testid="stChatInput"]:focus-within {
+        border: 3px solid #ef1c24 !important;
+        box-shadow: 0 0 20px rgba(254, 209, 0, 0.8) !important;
     }
     
     div[data-testid="stChatInput"] textarea {
@@ -214,57 +219,4 @@ if user_input:
                         ]
                     }
                     headers = {"Authorization": f"Bearer {current_key}", "Content-Type": "application/json"}
-                    trans_res = requests.post("https://api.groq.com/openai/v1/chat/completions", json=translate_payload, headers=headers)
-                    
-                    image_prompt = trans_res.json()["choices"][0]["message"]["content"] if trans_res.status_code == 200 else user_input
-                    clean_prompt = image_prompt.replace(" ", "%20")
-                    
-                    image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
-                    
-                    st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
-                    st.session_state.messages.append({"role": "assistant", "content": image_url})
-                except Exception as e:
-                    st.error("Failed to generate image.")
-
-    else:
-        if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
-            st.error("Abel, please insert your Groq gsk API keys!")
-        else:
-            with st.chat_message("assistant"):
-                with st.spinner("EthioAi is thinking..."):
-                    try:
-                        current_key = GROQ_API_KEYS[st.session_state.key_index]
-                        url = "https://api.groq.com/openai/v1/chat/completions"
-                        headers = {
-                            "Authorization": f"Bearer {current_key}",
-                            "Content-Type": "application/json"
-                        }
-                        
-                        if language == "አማርኛ":
-                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
-                        else:
-                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
-
-                        payload = {
-                            "model": "llama-3.3-70b-versatile",
-                            "messages": [
-                                {"role": "system", "content": system_prompt},
-                                {"role": "user", "content": user_input}
-                            ]
-                        }
-                        
-                        response = requests.post(url, json=payload, headers=headers, timeout=15)
-                        
-                        if response.status_code == 200:
-                            data = response.json()
-                            ai_response = data["choices"][0]["message"]["content"]
-                            st.markdown(ai_response)
-                            st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                        elif response.status_code in [429, 401, 400]:
-                            st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                            st.warning("Server line switching, please try again...")
-                        else:
-                            st.error(f"Error Code: {response.status_code}")
-                    except Exception as e:
-                        st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend.")
+                    trans_res = requests.post("https://api.groq
