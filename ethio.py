@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🎨 ሰርቨሩን የማይጭን፣ ቀላል እና ማራኪ የ CSS ዲዛይን (ነጭ ስክሪን እንዳይመጣ ተስተካክሏል)
+# 🎨 የገጹን ውበት ልክ በፎቶው ላይ እንዳለው በ CSS ማስተካከል
 st.markdown(
     """
     <style>
@@ -10,7 +10,7 @@ st.markdown(
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
     }
     
-    /* 🎬 መልእክቶች በቀስታ ብቅ እንዲሉ (Fade In) */
+    /* 🎬 መልእክቶች በቀስታ ብቅ እንዲሉ */
     .stChatMessage {
         border-radius: 15px !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
@@ -78,8 +78,13 @@ GROQ_API_KEYS = [
 if "key_index" not in st.session_state:
     st.session_state.key_index = 0
 
+# 🔄 የአሁኑ ቻት መልእክቶች ማከማቻ
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+# 📂 የድሮ ቻቶች በታሪክነት የሚቀመጡበት ትልቅ ማህደር (Saved Sessions)
+if "all_sessions" not in st.session_state:
+    st.session_state.all_sessions = {}
 
 # 👈 በግራ በኩል የቻት ታሪክ ማውጫ (Sidebar)
 with st.sidebar:
@@ -90,14 +95,31 @@ with st.sidebar:
     
     st.write("---")
     
-    # ➕ አዲሱ የ"New Chat" ቁልፍ
     st.subheader("Chat Sessions")
+    # ➕ "New Chat" ሲጫን የአሁኑን ወሬ ሴቭ አድርጎ አዲስ ባዶ ገጽ ይከፍታል
     if st.button("➕ New Chat"):
-        st.session_state.messages = []
-        st.success("New chat started!")
+        if st.session_state.messages:
+            # የመጀመሪያዋን የተጠቃሚ ጥያቄ ለታሪኩ ስምነት እንጠቀምባታለን
+            first_question = st.session_state.messages[0]["content"]
+            session_title = first_question[:25] + "..." if len(first_question) > 25 else first_question
+            
+            # ወሬውን ወደ ታሪክ ማህደር መጫን
+            st.session_state.all_sessions[session_title] = st.session_state.messages
+            
+        st.session_state.messages = []  # የአሁኑን ገጽ ንጹህ ማድረግ
         st.rerun()
 
-# የቀድሞ የቻት ታሪኮችን በገጹ ላይ ማሳያ
+    # 💬 የድሮ የነበሩ ቻቶችን ማውጫ (History list)
+    if st.session_state.all_sessions:
+        st.write("---")
+        st.subheader("📜 Chat History")
+        for title in list(st.session_state.all_sessions.keys()):
+            # የድሮውን ቻት መልሶ ለመክፈት የሚረዳ ቁልፍ
+            if st.button(f"💬 {title}", key=title):
+                st.session_state.messages = st.session_state.all_sessions[title]
+                st.rerun()
+
+# የቀድሞ የአሁኑን ቻት መልእክቶች በገጹ ላይ ማሳያ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
