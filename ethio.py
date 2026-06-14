@@ -1,9 +1,48 @@
 import streamlit as st
 import requests
 
-st.title("🤖 EthioAi")
+# 🎨 የገጹን ውበት ልክ በፎቶው ላይ እንዳለው ሙሉ በሙሉ በ CSS ማስተካከል
+st.markdown(
+    """
+    <style>
+    /* 🇪🇹 ልክ እንደ ፎቶው የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
+    .stApp {
+        background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
+    }
+    
+    /* 🎬 የጽሑፍ አኒሜሽን (Fade In & Up) */
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stChatMessage {
+        animation: fadeInUp 0.4s ease-out forwards;
+        border-radius: 15px !important;
+    }
+    
+    /* 🎨 በፎቶው ላይ እንዳለው ነጭ የቻት ባር ማስተካከያ */
+    div[data-testid="stChatInput"] {
+        border: 2px solid #009c3a !important;
+        border-radius: 35px !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    div[data-testid="stChatInput"] textarea {
+        color: #000000 !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        background-color: #ffffff !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# 🚨 Abel, remember to put your 3 real gsk keys in these quotes!
+st.title("🇪🇹 EthioAi")
+
+# 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
     "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",
     "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",
@@ -13,15 +52,23 @@ GROQ_API_KEYS = [
 if "key_index" not in st.session_state:
     st.session_state.key_index = 0
 
-# 🔄 1. Chat History System
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 🖼️ 2. Image Mode Toggle System (Fixes the image generation bug)
-if "image_mode" not in st.session_state:
-    st.session_state.image_mode = False
+# 👈 1. ልክ እንደ ፎቶው በግራ በኩል የቻት ታሪክ እና የቋንቋ መምረጫ (Sidebar)
+with st.sidebar:
+    st.header("📋 EthioAi Menu")
+    
+    # 🌐 የቋንቋ መምረጫ ምርጫ (English እና Amharic)
+    language = st.radio("🌐 Choose Language / ቋንቋ ይምረጡ፦", ["English", "አማርኛ"])
+    
+    st.write("---")
+    st.subheader("💬 Chat History")
+    if st.button("🗑️ Clear Chat"):
+        st.session_state.messages = []
+        st.rerun()
 
-# Display older chat messages from history
+# የቀድሞ የቻት ታሪኮችን በገጹ ላይ ማሳያ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
@@ -29,68 +76,70 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# 🎨 3. Layout for buttons and chat bar
-col1, col2 = st.columns([1, 1])
-with col1:
-    if st.button("💬 Chat Mode"):
-        st.session_state.image_mode = False
-        st.rerun()
-with col2:
-    if st.button("🖼️ Image Mode"):
-        st.session_state.image_mode = True
-        st.rerun()
-
-# Show the user which mode is currently active
-if st.session_state.image_mode:
-    st.info("🎨 Current Mode: Image Generator (Write what you want to see)")
-else:
-    st.info("💬 Current Mode: English AI Chat")
-
-# 💬 Chat Input Bar
-user_input = st.chat_input("Type your message here...")
+# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
+user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
 
 if user_input:
-    # Display user message and save to history
+    # የተጠቃሚውን ጥያቄ ማሳየት እና ታሪክ ውስጥ መመዝገብ
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # 🖼️ FIX: If Image Mode is ON, generate image directly using Pollinations AI
-    if st.session_state.image_mode:
+    # 🖼️ የምስል ጥያቄ መሆኑን ማረጋገጫ (በሁለቱም ቋንቋ ይሰራል)
+    is_image_request = any(word in user_input.lower() for word in ["image", "picture", "photo", "generate", "ምስል", "ስዕል", "ፎቶ"])
+
+    if is_image_request:
         with st.chat_message("assistant"):
-            with st.spinner("EthioAi is painting your image..."):
+            with st.spinner("EthioAi is painting... / EthioAi ምስል እየሳለ ነው..."):
                 try:
-                    # Clean the text for URL link
-                    clean_prompt = user_input.replace(" ", "%20")
+                    # ወደ እንግሊዘኛ ቀይሮ ለ Pollinations AI እንዲመች ማድረግ
+                    current_key = GROQ_API_KEYS[st.session_state.key_index]
+                    translate_payload = {
+                        "model": "llama-3.3-70b-versatile",
+                        "messages": [
+                            {"role": "system", "content": "Translate the user prompt into a short English image generation prompt. Only return the English translation, nothing else."},
+                            {"role": "user", "content": user_input}
+                        ]
+                    }
+                    headers = {"Authorization": f"Bearer {current_key}", "Content-Type": "application/json"}
+                    trans_res = requests.post("https://api.groq.com/openai/v1/chat/completions", json=translate_payload, headers=headers)
+                    
+                    image_prompt = trans_res.json()["choices"][0]["message"]["content"] if trans_res.status_code == 200 else user_input
+                    clean_prompt = image_prompt.replace(" ", "%20")
+                    
                     image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
                     
-                    # Show image and save the URL to history
+                    # ምስሉን ማሳየት እና መመዝገብ
                     st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
                     st.session_state.messages.append({"role": "assistant", "content": image_url})
                 except Exception as e:
-                    st.error("Sorry, failed to generate the image. Please try again.")
+                    st.error("Failed to generate image. / ምስሉን መፍጠር አልተቻለም።")
 
-    # 💬 If Image Mode is OFF, reply in English text using Groq
+    # 💬 ተራ የጽሑፍ ጨዋታ ከሆነ (በተመረጠው ቋንቋ ይመልሳል)
     else:
-        if "YOUR_REAL_KEY" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
-            st.error("Abel, please insert your Groq gsk API keys in the code!")
+        if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
+            st.error("Abel, please insert your Groq gsk API keys! / አቤል እባክህ የ Groq ኮድህን አስገባ!")
         else:
             with st.chat_message("assistant"):
-                with st.spinner("EthioAi is thinking..."):
+                with st.spinner("EthioAi is thinking... / እያሰበ ነው..."):
                     try:
                         current_key = GROQ_API_KEYS[st.session_state.key_index]
-                        
                         url = "https://api.groq.com/openai/v1/chat/completions"
                         headers = {
                             "Authorization": f"Bearer {current_key}",
                             "Content-Type": "application/json"
                         }
                         
-                        # System prompt changed to English language only
+                        # ቋንቋውን በምንመርጠው መሠረት ሲስተሙ ይቀይረዋል
+                        if language == "አማርኛ":
+                            system_prompt = "You are EthioAi. You must respond in fluent, beautiful, and short Amharic language."
+                        else:
+                            system_prompt = "You are EthioAi. You must respond in professional, clear, and short English language."
+
                         payload = {
                             "model": "llama-3.3-70b-versatile",
                             "messages": [
-                                {"role": "system", "content": "You are EthioAi, a smart assistant created by Abel. You must respond in professional, short, clear, and perfect English language."},
+                                {"role": "system", "content": system_prompt},
                                 {"role": "user", "content": user_input}
                             ]
                         }
@@ -106,10 +155,10 @@ if user_input:
                             
                         elif response.status_code in [429, 401, 400]:
                             st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                            st.warning("EthioAi switching server lines, please send your message again...")
+                            st.warning("Server line switching, please try again... / ሰርቨር እየተቀየረ ነው፣ እባክህ ድጋሚ ላከው...")
                         else:
-                            st.error(f"Groq Error Code: {response.status_code}")
+                            st.error(f"Error Code: {response.status_code}")
                             
                     except Exception as e:
                         st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend your message.")
+                        st.error("Connection error, please resend. / የሰርቨር መገናኘት ችግር፣ እባክህ ድጋሚ ላከው።")
