@@ -3,7 +3,7 @@ import requests
 from gtts import gTTS
 import os
 
-# 🎨 የገጹን ውበት፣ አኒሜሽን እና የሳጥኑን ዲዛይን በ CSS ማስተካከል
+# 🎨 የገጹን ውበት እና የቻት ባሩን ቀለም በሁሉም ስልክ እንዲታይ ማስተካከል
 st.markdown(
     """
     <style>
@@ -28,24 +28,27 @@ st.markdown(
         border: 1px solid #334155 !important;
     }
     
-    # 🎨 አዲሱ የቻት ባር ዲዛይን - በሁሉም አንድሮይድ ላይ በግልጽ እንዲታይ
+    /* 🎨 ፍጹም የቻት ባር ማስተካከያ - በሁሉም አንድሮይድ ላይ 100% እንዲታይ */
     div[data-testid="stChatInput"] {
-        border: 2px solid #38bdf8 !important;
-        border-radius: 30px !important;
-        background-color: #f1f5f9 !important; /* የሳጥኑ ውስጠኛ ቀለም ፈዘዝ ያለ ነጭ/ግራጫ */
-        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3) !important;
+        border: 3px solid #38bdf8 !important;
+        border-radius: 25px !important;
+        background-color: #ffffff !important; /* የሳጥኑ ጀርባ ንፁህ ነጭ */
+        box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4) !important;
+        padding: 5px !important;
     }
     
-    /* ✍️ በሳጥኑ ውስጥ የሚጻፈው ጽሑፍ በሁሉም ስልክ ላይ ጥቁር ሆኖ እንዲታይ */
+    /* ✍️ በሳጥኑ ውስጥ የሚጻፈው ጽሑፍ ደማቅ ጥቁር ማድረጊያ */
     div[data-testid="stChatInput"] textarea {
-        color: #0f172a !important; /* የጽሑፉ ቀለም ደማቅ ጥቁር ሰማያዊ */
-        font-weight: 500 !important;
+        color: #000000 !important; /* ፍጹም ጥቁር ጽሑፍ */
+        font-size: 16px !important;
+        font-weight: bold !important;
+        background-color: #ffffff !important;
     }
     
     /* የማይክሮፎን ሳጥኑን ማሳመሪያ */
     .audio-box {
         background-color: #111827;
-        border: 1px dashed #38bdf8;
+        border: 2px dashed #38bdf8;
         border-radius: 15px;
         padding: 10px;
         margin-bottom: 15px;
@@ -57,7 +60,7 @@ st.markdown(
 
 st.title("🤖 EthioAi")
 
-# ⚠️ አቤል ወንድሜ፣ 3ቱንም የgsk ኮዶችህን እዚህ ጥቅስ ውስጥ አስገባቸው!
+# ⚠️ አቤል ወንድሜ፣ 3ቱንም የgsk ኮዶችህን እዚህ ጥቅስ ውስጥ ማስገባትህን እንዳትረሳ!
 GROQ_API_KEYS = [
     "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",
     "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",
@@ -87,7 +90,7 @@ with st.container():
 if audio_value:
     user_input = "በድምፅ የተላከ መልእክት አለ (እባክህ እጅግ በጣም ጥራት ባለው አማርኛ ምላሽ ስጥ)"
 
-# 💬 የጽሕፈት ቻት ባር (አሁን ቀለሙ ተስተካክሏል)
+# 💬 የጽሕፈት ቻት ባር (አሁን በሁሉም ስልክ ላይ በግልጽ ይታያል)
 chat_input = st.chat_input("እዚህ ጋር በግልጽ ይጻፉ...")
 if chat_input:
     user_input = chat_input
@@ -105,12 +108,13 @@ if user_input:
         "Content-Type": "application/json"
     }
     
+    # 🔥 እዚህ ጋር ሁልጊዜ የሚሠራውንና ለአማርኛ ቆንጆ የሆነውን ትልቁን ሞዴል (llama3-70b-8192) ተክተነዋል!
     payload = {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama3-70b-8192",
         "messages": [
             {
                 "role": "system", 
-                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in fluent, grammatically correct, and natural Amharic language. Speak like a professional Ethiopian human translator."
+                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in fluent, beautiful, and natural Amharic language. Speak clearly and like a real Ethiopian."
             },
             {"role": "user", "content": user_input}
         ]
@@ -121,6 +125,7 @@ if user_input:
             try:
                 response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
                 
+                # ኮዱ ጥያቄ በዝቶበት እምቢ ካለ (Limit 429) ወደ ቀጣዩ ኮድ ይቀይራል
                 if response.status_code == 429:
                     st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
                     st.warning("EthioAi መስመሩን እየቀየረ ነው፣ እባክህ ድጋሚ ላከው...")
@@ -139,4 +144,4 @@ if user_input:
                 st.audio(audio_file, format="audio/mp3")
                 
             except Exception as e:
-                st.error("ይቅርታ፣ ስህተት ተከስቷል።")
+                st.error("ይቅርታ፣ ከGroq ሰርቨር ጋር መገናኘት አልተቻለም። እባክህ የ gsk API Key ኮድህን በትክክል ማስገባትህን አረጋግጥ።")
