@@ -3,7 +3,7 @@ import requests
 from gtts import gTTS
 import os
 
-# 🎨 የገጹን ውበት እና አኒሜሽን በ CSS ማስተካከል
+# 🎨 የገጹን ውበት፣ አኒሜሽን እና የሳጥኑን ዲዛይን በ CSS ማስተካከል
 st.markdown(
     """
     <style>
@@ -27,15 +27,28 @@ st.markdown(
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
     }
+    
+    # 🎨 አዲሱ የቻት ባር ዲዛይን - በሁሉም አንድሮይድ ላይ በግልጽ እንዲታይ
     div[data-testid="stChatInput"] {
         border: 2px solid #38bdf8 !important;
         border-radius: 30px !important;
-        background-color: #111827 !important;
-        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2) !important;
-        transition: all 0.3s ease;
+        background-color: #f1f5f9 !important; /* የሳጥኑ ውስጠኛ ቀለም ፈዘዝ ያለ ነጭ/ግራጫ */
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3) !important;
     }
+    
+    /* ✍️ በሳጥኑ ውስጥ የሚጻፈው ጽሑፍ በሁሉም ስልክ ላይ ጥቁር ሆኖ እንዲታይ */
     div[data-testid="stChatInput"] textarea {
-        color: #ffffff !important;
+        color: #0f172a !important; /* የጽሑፉ ቀለም ደማቅ ጥቁር ሰማያዊ */
+        font-weight: 500 !important;
+    }
+    
+    /* የማይክሮፎን ሳጥኑን ማሳመሪያ */
+    .audio-box {
+        background-color: #111827;
+        border: 1px dashed #38bdf8;
+        border-radius: 15px;
+        padding: 10px;
+        margin-bottom: 15px;
     }
     </style>
     """,
@@ -62,19 +75,20 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ የሰው ድምፅ መቀበያ ሲስተም (Safe Human Audio Input)
-st.write("🎙️ በድምፅ ለመጠየቅ ከታች ያለውን ማይክሮፎን ይጫኑ፦")
-audio_value = st.audio_input("ድምፅዎን ይቅረጹ")
-
 user_input = ""
+
+# 🎙️ የማይክሮፎን ሲስተም
+with st.container():
+    st.markdown('<div class="audio-box">', unsafe_allow_html=True)
+    audio_value = st.audio_input("🎙️ በድምፅ ለመጠየቅ ማይኩን ይጫኑ")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ሰውየው ድምፅ ቀርጾ ካስገባ
 if audio_value:
-    st.audio(audio_value, format="audio/wav")
-    user_input = "በድምፅ የተላከ ጥያቄ አለ (እባክህ በቆንጆ አማርኛ መልስ ስጥ)"
+    user_input = "በድምፅ የተላከ መልእክት አለ (እባክህ እጅግ በጣም ጥራት ባለው አማርኛ ምላሽ ስጥ)"
 
-# በጽሑፍም መቀበያ
-chat_input = st.chat_input("ወይም እዚህ ጋር በጽሑፍ ይጻፉ...")
+# 💬 የጽሕፈት ቻት ባር (አሁን ቀለሙ ተስተካክሏል)
+chat_input = st.chat_input("እዚህ ጋር በግልጽ ይጻፉ...")
 if chat_input:
     user_input = chat_input
 
@@ -92,11 +106,11 @@ if user_input:
     }
     
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "mixtral-8x7b-32768",
         "messages": [
             {
                 "role": "system", 
-                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in perfect, beautiful, and fluent Amharic language. Speak like a native Ethiopian."
+                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in fluent, grammatically correct, and natural Amharic language. Speak like a professional Ethiopian human translator."
             },
             {"role": "user", "content": user_input}
         ]
