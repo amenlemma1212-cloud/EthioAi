@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🎨 ያንተን ጽሑፍ ወደ ቀኝ፣ የ AIውን ወደ ግራ ማድረጊያ የ CSS ማስተካከያ
+# 🎨 ያንተን ጽሑፍ ወደ ግራ፣ የ AIውን ወደ ቀኝ ማድረጊያ እና ጠርዞቹን የኩርባ (Curve) ማድረጊያ CSS
 st.markdown(
     """
     <style>
@@ -29,29 +29,32 @@ st.markdown(
         font-weight: bold !important;
     }
     
-    /* 🎬 የሳጥኖቹ አጠቃላይ ዲዛይን */
-    .stChatMessage {
-        border-radius: 15px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-        margin-bottom: 10px !important;
-    }
-    
-    /* 🤖 👈 የ AIው መልእክት (Assistant) ወደ ግራ (Left) እንዲቀመጥ ማድረጊያ */
+    /* 🎬 🔄 ሮቦት (AI) text -> ወደ ቀኝ (Right) እና በጣም ክብ የኩርባ ጠርዝ (Highly Curved) */
     div[data-testid="stChatMessageAssistant"] {
-        border-left: 5px solid #fed100 !important;
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        margin-right: 20% !important;
-        margin-left: 0% !important;
-    }
-    
-    /* 👤 👉 ያንተ መልእክት (User) ወደ ቀኝ (Right) እንዲቀመጥ ማድረጊያ */
-    div[data-testid="stChatMessageUser"] {
-        border-right: 5px solid #009c3a !important;
+        border-right: 5px solid #fed100 !important;
         border-left: none !important;
-        background-color: rgba(240, 248, 255, 0.95) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         margin-left: 20% !important;
         margin-right: 0% !important;
+        border-radius: 25px 25px 0px 25px !important; /* 👈 የኩርባ ቅርጽ ማስተካከያ */
+    }
+    
+    /* 👤 🔄 ሰው (Human/User) text -> ወደ ግራ (Left) እና በጣም ክብ የኩርባ ጠርዝ (Highly Curved) */
+    div[data-testid="stChatMessageUser"] {
+        border-left: 5px solid #009c3a !important;
+        border-right: none !important;
+        background-color: rgba(240, 248, 255, 0.95) !important;
+        margin-right: 20% !important;
+        margin-left: 0% !important;
         text-align: left !important;
+        border-radius: 25px 25px 25px 0px !important; /* 👈 የኩርባ ቅርጽ ማስተካከያ */
+    }
+    
+    /* 🎬 አጠቃላይ የሳጥን ውበት */
+    .stChatMessage {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        margin-bottom: 12px !important;
+        padding: 15px !important;
     }
     
     /* ➕ "New Chat" ማራኪ ሰማያዊ ቁልፍ */
@@ -59,7 +62,7 @@ st.markdown(
         background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%) !important;
         color: white !important;
         font-weight: bold !important;
-        border-radius: 20px !important;
+        border-radius: 25px !important;
         border: none !important;
         box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4) !important;
         width: 100% !important;
@@ -264,4 +267,4 @@ if user_input:
                             st.error(f"Error Code: {response.status_code}")
                     except Exception as e:
                         st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend.") 
+                        st.error("Connection error, please resend.")
