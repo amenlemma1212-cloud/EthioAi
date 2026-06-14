@@ -1,81 +1,44 @@
 import streamlit as st
 import requests
 
-# 🎨 በጣም እጅግ በጣም ያማሩ አኒሜሽኖች (Very Very Heavy Animations) በ CSS
+# 🎨 ሰርቨሩን የማይጭን፣ ቀላል እና ማራኪ የ CSS ዲዛይን (ነጭ ስክሪን እንዳይመጣ ተስተካክሏል)
 st.markdown(
     """
     <style>
     /* 🇪🇹 የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
     .stApp {
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
-        position: relative;
-        overflow: hidden;
     }
     
-    /* 🌌 በጀርባ ላይ የሚንሳፈፉ ኮከቦች አኒሜሽን (Floating Stars) */
-    .stApp::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-image: radial-gradient(circle, #ffffff 1px, transparent 1px), 
-                          radial-gradient(circle, #fed100 1px, transparent 2px);
-        background-size: 40px 40px, 60px 60px;
-        opacity: 0.3;
-        animation: floatBackground 10s linear infinite;
-        z-index: 0;
-    }
-    @keyframes floatBackground {
-        0% { background-position: 0px 0px; }
-        100% { background-position: 40px -60px; }
-    }
-    
-    /* 🎬 የጽሑፎች አኒሜሽን (Fade In & Up) */
-    @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
-        100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-    }
+    /* 🎬 መልእክቶች በቀስታ ብቅ እንዲሉ (Fade In) */
     .stChatMessage {
-        animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        border-radius: 20px !important;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
-        transition: all 0.3s ease;
+        border-radius: 15px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }
     
-    /* 🌈 የመልእክት ሳጥኖች ዙሪያ በኒዮን እንዲያበራ (Neon Border Pulse) */
+    /* 🌈 የመልእክት ሳጥኖች ዙሪያ ቀለም */
     div[data-testid="stChatMessageAssistant"] {
-        border: 2px solid #fed100 !important;
-        box-shadow: 0 0 15px rgba(254, 209, 0, 0.4) !important;
+        border-left: 5px solid #fed100 !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
     }
     div[data-testid="stChatMessageUser"] {
-        border: 2px solid #009c3a !important;
-        box-shadow: 0 0 15px rgba(0, 156, 58, 0.4) !important;
+        border-left: 5px solid #009c3a !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
     }
     
-    /* ➕ "New Chat" ኒዮን ማራኪ ቁልፍ አኒሜሽን */
+    /* ➕ "New Chat" ማራኪ ሰማያዊ ቁልፍ */
     .stButton>button {
         background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%) !important;
         color: white !important;
         font-weight: bold !important;
-        border-radius: 25px !important;
+        border-radius: 20px !important;
         border: none !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.6) !important;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4) !important;
         width: 100% !important;
+        transition: transform 0.2s ease !important;
     }
     .stButton>button:hover {
-        transform: scale(1.08) !important;
-        box-shadow: 0 0 25px rgba(0, 242, 254, 1) !important;
-    }
-    
-    /* 📋 በግራ በኩል ያለው ማውጫ (Sidebar) አኒሜሽን */
-    section[data-testid="stSidebar"] {
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        backdrop-filter: blur(10px) !important;
-        animation: sidebarSlide 0.5s ease-out forwards;
-    }
-    @keyframes sidebarSlide {
-        0% { transform: translateX(-50px); opacity: 0; }
-        100% { transform: translateX(0); opacity: 1; }
+        transform: scale(1.05) !important;
     }
     
     /* 🎨 ነጭ የቻት ባር ማስተካከያ */
@@ -83,15 +46,13 @@ st.markdown(
         border: 3px solid #009c3a !important;
         border-radius: 35px !important;
         background-color: #ffffff !important;
-        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3) !important;
-        transition: all 0.3s ease-in-out !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
     }
     
-    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ ደምቆ እንዲያበራ ማድረጊያ አኒሜሽን (Focus Glow) */
+    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ የሚመጣ አኒሜሽን */
     div[data-testid="stChatInput"]:focus-within {
         border: 3px solid #ef1c24 !important;
-        box-shadow: 0 0 30px rgba(254, 209, 0, 0.9) !important;
-        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(254, 209, 0, 0.8) !important;
     }
     
     div[data-testid="stChatInput"] textarea {
@@ -129,11 +90,11 @@ with st.sidebar:
     
     st.write("---")
     
-    # ➕ አዲሱ የ"New Chat" ቁልፍ ልክ በፎቶው መሠረት
+    # ➕ አዲሱ የ"New Chat" ቁልፍ
     st.subheader("Chat Sessions")
     if st.button("➕ New Chat"):
-        st.session_state.messages = []  # ታሪኩን ያጠፋዋል
-        st.success("New chat started! / አዲስ ቻት ተጀምሯል!")
+        st.session_state.messages = []
+        st.success("New chat started!")
         st.rerun()
 
 # የቀድሞ የቻት ታሪኮችን በገጹ ላይ ማሳያ
@@ -157,7 +118,7 @@ if user_input:
 
     if is_image_request:
         with st.chat_message("assistant"):
-            with st.spinner("EthioAi is painting... / EthioAi ምስል እየሳለ ነው..."):
+            with st.spinner("EthioAi ምስል እየሳለ ነው..."):
                 try:
                     current_key = GROQ_API_KEYS[st.session_state.key_index]
                     translate_payload = {
@@ -178,7 +139,7 @@ if user_input:
                     st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
                     st.session_state.messages.append({"role": "assistant", "content": image_url})
                 except Exception as e:
-                    st.error("Failed to generate image. / ምስሉን መፍጠር አልተቻለም።")
+                    st.error("Failed to generate image.")
 
     # 💬 የጽሑፍ ጨዋታ (ፈጣሪው Abel Teshome መሆኑን የሚያረጋግጠው ክፍል)
     else:
@@ -186,7 +147,7 @@ if user_input:
             st.error("Abel, please insert your Groq gsk API keys!")
         else:
             with st.chat_message("assistant"):
-                with st.spinner("EthioAi is thinking... / እያሰበ ነው..."):
+                with st.spinner("EthioAi is thinking..."):
                     try:
                         current_key = GROQ_API_KEYS[st.session_state.key_index]
                         url = "https://api.groq.com/openai/v1/chat/completions"
