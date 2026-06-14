@@ -1,49 +1,97 @@
 import streamlit as st
 import requests
 
-# 🎨 የገጹን ውበት፣ ያንተን ፎቶ ዲዛይን እና ሁሉንም አዲሱን አኒሜሽኖች በ CSS ማስተካከል
+# 🎨 በጣም እጅግ በጣም ያማሩ አኒሜሽኖች (Very Very Heavy Animations) በ CSS
 st.markdown(
     """
     <style>
     /* 🇪🇹 የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
     .stApp {
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* 🎬 ጽሑፎች እና መልእክቶች በቀስታ ከታች ወደ ላይ ብቅ እንዲሉ (Fade In & Up) */
+    /* 🌌 በጀርባ ላይ የሚንሳፈፉ ኮከቦች አኒሜሽን (Floating Stars) */
+    .stApp::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: radial-gradient(circle, #ffffff 1px, transparent 1px), 
+                          radial-gradient(circle, #fed100 1px, transparent 2px);
+        background-size: 40px 40px, 60px 60px;
+        opacity: 0.3;
+        animation: floatBackground 10s linear infinite;
+        z-index: 0;
+    }
+    @keyframes floatBackground {
+        0% { background-position: 0px 0px; }
+        100% { background-position: 40px -60px; }
+    }
+    
+    /* 🎬 የጽሑፎች አኒሜሽን (Fade In & Up) */
     @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(15px); }
-        100% { opacity: 1; transform: translateY(0); }
+        0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+        100% { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
-    
     .stChatMessage {
-        animation: fadeInUp 0.4s ease-out forwards;
-        border-radius: 15px !important;
+        animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        border-radius: 20px !important;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
+        transition: all 0.3s ease;
     }
     
-    /* 📋 በግራ በኩል ያለው ማውጫ (Sidebar) በቀስታ ብቅ እንዲል ማድረጊያ አኒሜሽን */
-    @keyframes sidebarFade {
-        0% { opacity: 0; transform: translateX(-20px); }
-        100% { opacity: 1; transform: translateX(0); }
+    /* 🌈 የመልእክት ሳጥኖች ዙሪያ በኒዮን እንዲያበራ (Neon Border Pulse) */
+    div[data-testid="stChatMessageAssistant"] {
+        border: 2px solid #fed100 !important;
+        box-shadow: 0 0 15px rgba(254, 209, 0, 0.4) !important;
     }
+    div[data-testid="stChatMessageUser"] {
+        border: 2px solid #009c3a !important;
+        box-shadow: 0 0 15px rgba(0, 156, 58, 0.4) !important;
+    }
+    
+    /* ➕ "New Chat" ኒዮን ማራኪ ቁልፍ አኒሜሽን */
+    .stButton>button {
+        background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%) !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 25px !important;
+        border: none !important;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.6) !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        width: 100% !important;
+    }
+    .stButton>button:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 0 25px rgba(0, 242, 254, 1) !important;
+    }
+    
+    /* 📋 በግራ በኩል ያለው ማውጫ (Sidebar) አኒሜሽን */
     section[data-testid="stSidebar"] {
-        animation: sidebarFade 0.5s ease-out forwards;
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        animation: sidebarSlide 0.5s ease-out forwards;
+    }
+    @keyframes sidebarSlide {
+        0% { transform: translateX(-50px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
     }
     
     /* 🎨 ነጭ የቻት ባር ማስተካከያ */
     div[data-testid="stChatInput"] {
-        border: 2px solid #009c3a !important;
+        border: 3px solid #009c3a !important;
         border-radius: 35px !important;
         background-color: #ffffff !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3) !important;
         transition: all 0.3s ease-in-out !important;
     }
     
-    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ ደምቆ እንዲያበራ ማድረጊያ አኒሜሽን (Focus Glow Animation) */
+    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ ደምቆ እንዲያበራ ማድረጊያ አኒሜሽን (Focus Glow) */
     div[data-testid="stChatInput"]:focus-within {
         border: 3px solid #ef1c24 !important;
-        box-shadow: 0 0 25px rgba(254, 209, 0, 0.8) !important;
-        transform: scale(1.01);
+        box-shadow: 0 0 30px rgba(254, 209, 0, 0.9) !important;
+        transform: scale(1.02);
     }
     
     div[data-testid="stChatInput"] textarea {
@@ -72,16 +120,20 @@ if "key_index" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 👈 በግራ በኩል የቻት ታሪክ እና የቋንቋ መምረጫ (Sidebar) በአኒሜሽን
+# 👈 በግራ በኩል የቻት ታሪክ ማውጫ (Sidebar)
 with st.sidebar:
     st.header("📋 EthioAi Menu")
     
+    # 🌐 የቋንቋ መምረጫ
     language = st.radio("🌐 Choose Language / ቋንቋ ይምረጡ፦", ["English", "አማርኛ"])
     
     st.write("---")
-    st.subheader("💬 Chat History")
-    if st.button("🗑️ Clear Chat"):
-        st.session_state.messages = []
+    
+    # ➕ አዲሱ የ"New Chat" ቁልፍ ልክ በፎቶው መሠረት
+    st.subheader("Chat Sessions")
+    if st.button("➕ New Chat"):
+        st.session_state.messages = []  # ታሪኩን ያጠፋዋል
+        st.success("New chat started! / አዲስ ቻት ተጀምሯል!")
         st.rerun()
 
 # የቀድሞ የቻት ታሪኮችን በገጹ ላይ ማሳያ
@@ -92,7 +144,7 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር (በአኒሜሽን የተገነባ)
+# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
 
 if user_input:
@@ -128,7 +180,7 @@ if user_input:
                 except Exception as e:
                     st.error("Failed to generate image. / ምስሉን መፍጠር አልተቻለም።")
 
-    # 💬 የጽሑፍ ጨዋታ (ስምህን Abel Teshome ብሎ እንዲጠራ የተደረገበት ክፍል)
+    # 💬 የጽሑፍ ጨዋታ (ፈጣሪው Abel Teshome መሆኑን የሚያረጋግጠው ክፍል)
     else:
         if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
             st.error("Abel, please insert your Groq gsk API keys!")
@@ -143,11 +195,10 @@ if user_input:
                             "Content-Type": "application/json"
                         }
                         
-                        # 🚨 እዚህ ጋር ለ AIው ፈጣሪው አንተ (Abel Teshome) መሆንህን በግልጽ አስተምረነዋል!
                         if language == "አማርኛ":
                             system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
                         else:
-                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Do not say Meta AI. Respond in short, clear, and perfect English language."
+                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
 
                         payload = {
                             "model": "llama-3.3-70b-versatile",
