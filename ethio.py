@@ -100,8 +100,8 @@ st.title("🇪🇹 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
-    "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",    
-    "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",    
+    "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",
+    "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",
     "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"
 ]
 
@@ -221,4 +221,60 @@ if user_input:
                         ]
                     }
                     headers = {"Authorization": f"Bearer {current_key}", "Content-Type": "application/json"}
-                    trans_res = requests.post("https://api.groq
+                    
+                    # 🛠️ እንዳይቆራረጥ ሊንኩን በአጭሩ አስቀምጠነዋል
+                    groq_url = "https://api.groq.com/openai/v1/chat/completions"
+                    trans_res = requests.post(groq_url, json=translate_payload, headers=headers)
+                    
+                    image_prompt = trans_res.json()["choices"][0]["message"]["content"] if trans_res.status_code == 200 else user_input
+                    clean_prompt = image_prompt.replace(" ", "%20")
+                    
+                    image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
+                    
+                    st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
+                    st.session_state.messages.append({"role": "assistant", "content": image_url})
+                except Exception as e:
+                    st.error("Failed to generate image.")
+
+    else:
+        if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
+            st.error("Abel, please insert your Groq gsk API keys!")
+        else:
+            with st.chat_message("assistant"):
+                with st.spinner("EthioAi is thinking..."):
+                    try:
+                        current_key = GROQ_API_KEYS[st.session_state.key_index]
+                        url = "https://api.groq.com/openai/v1/chat/completions"
+                        headers = {
+                            "Authorization": f"Bearer {current_key}",
+                            "Content-Type": "application/json"
+                        }
+                        
+                        if language == "አማርኛ":
+                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
+                        else:
+                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
+
+                        payload = {
+                            "model": "llama-3.3-70b-versatile",
+                            "messages": [
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_input}
+                            ]
+                        }
+                        
+                        response = requests.post(url, json=payload, headers=headers, timeout=15)
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            ai_response = data["choices"][0]["message"]["content"]
+                            st.markdown(ai_response)
+                            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                        elif response.status_code in [429, 401, 400]:
+                            st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
+                            st.warning("Server line switching, please try again...")
+                        else:
+                            st.error(f"Error Code: {response.status_code}")
+                    except Exception as e:
+                        st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
+                        st.error("Connection error, please resend.")
