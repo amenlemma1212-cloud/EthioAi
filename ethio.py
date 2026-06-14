@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from gtts import gTTS
-from audiorecorder import audiorecorder
 import os
 
 # 🎨 የገጹን ውበት እና አኒሜሽን በ CSS ማስተካከል
@@ -49,7 +48,7 @@ st.title("🤖 EthioAi")
 GROQ_API_KEYS = [
     "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",
     "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",
-    "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"
+    "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"
 ]
 
 if "key_index" not in st.session_state:
@@ -63,17 +62,16 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ የሰው ድምፅ መቀበያ ሲስተም (Human Audio Recorder)
+# 🎙️ የሰው ድምፅ መቀበያ ሲስተም (Safe Human Audio Input)
 st.write("🎙️ በድምፅ ለመጠየቅ ከታች ያለውን ማይክሮፎን ይጫኑ፦")
-audio = audiorecorder("ሪከርድ አድርግ", "በመቅረጽ ላይ...", key="human_voice")
+audio_value = st.audio_input("ድምፅዎን ይቅረጹ")
 
 user_input = ""
 
-# ሰውየው ድምፅ ቀርጾ ካቆመ
-if len(audio) > 0:
-    st.audio(audio.export().read(), format="audio/wav")
-    # ማሳሰቢያ፦ ይህ ድምፅ ወደ ጽሑፍ ተቀይሮ ለ Groq እንዲላክ ቀጣይ ደረጃ ላይ ሙሉ በሙሉ እናገናኘዋለን።
-    user_input = "በድምፅ የተላከ ጥያቄ አለ (ድምፁን ለመስማት ከላይ ያጫውቱ)"
+# ሰውየው ድምፅ ቀርጾ ካስገባ
+if audio_value:
+    st.audio(audio_value, format="audio/wav")
+    user_input = "በድምፅ የተላከ ጥያቄ አለ (እባክህ በቆንጆ አማርኛ መልስ ስጥ)"
 
 # በጽሑፍም መቀበያ
 chat_input = st.chat_input("ወይም እዚህ ጋር በጽሑፍ ይጻፉ...")
@@ -98,7 +96,7 @@ if user_input:
         "messages": [
             {
                 "role": "system", 
-                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in perfect, natural, and fluent Amharic language."
+                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in perfect, beautiful, and fluent Amharic language. Speak like a native Ethiopian."
             },
             {"role": "user", "content": user_input}
         ]
