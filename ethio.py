@@ -1,16 +1,16 @@
 import streamlit as st
 import requests
 
-# 🎨 የገጹን ውበት ልክ በፎቶው ላይ እንዳለው ሙሉ በሙሉ በ CSS ማስተካከል
+# 🎨 የገጹን ውበት፣ ያንተን ፎቶ ዲዛይን እና ሁሉንም አዲሱን አኒሜሽኖች በ CSS ማስተካከል
 st.markdown(
     """
     <style>
-    /* 🇪🇹 ልክ እንደ ፎቶው የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
+    /* 🇪🇹 የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
     .stApp {
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
     }
     
-    /* 🎬 የጽሑፍ አኒሜሽን (Fade In & Up) */
+    /* 🎬 ጽሑፎች እና መልእክቶች በቀስታ ከታች ወደ ላይ ብቅ እንዲሉ (Fade In & Up) */
     @keyframes fadeInUp {
         0% { opacity: 0; transform: translateY(15px); }
         100% { opacity: 1; transform: translateY(0); }
@@ -21,12 +21,29 @@ st.markdown(
         border-radius: 15px !important;
     }
     
-    /* 🎨 በፎቶው ላይ እንዳለው ነጭ የቻት ባር ማስተካከያ */
+    /* 📋 በግራ በኩል ያለው ማውጫ (Sidebar) በቀስታ ብቅ እንዲል ማድረጊያ አኒሜሽን */
+    @keyframes sidebarFade {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    section[data-testid="stSidebar"] {
+        animation: sidebarFade 0.5s ease-out forwards;
+    }
+    
+    /* 🎨 ነጭ የቻት ባር ማስተካከያ */
     div[data-testid="stChatInput"] {
         border: 2px solid #009c3a !important;
         border-radius: 35px !important;
         background-color: #ffffff !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+    
+    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ ደምቆ እንዲያበራ ማድረጊያ አኒሜሽን (Focus Glow Animation) */
+    div[data-testid="stChatInput"]:focus-within {
+        border: 3px solid #ef1c24 !important;
+        box-shadow: 0 0 25px rgba(254, 209, 0, 0.8) !important;
+        transform: scale(1.01);
     }
     
     div[data-testid="stChatInput"] textarea {
@@ -46,7 +63,7 @@ st.title("🇪🇹 EthioAi")
 GROQ_API_KEYS = [
     "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",
     "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",
-    "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"
+    "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"
 ]
 
 if "key_index" not in st.session_state:
@@ -55,11 +72,10 @@ if "key_index" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 👈 1. ልክ እንደ ፎቶው በግራ በኩል የቻት ታሪክ እና የቋንቋ መምረጫ (Sidebar)
+# 👈 በግራ በኩል የቻት ታሪክ እና የቋንቋ መምረጫ (Sidebar) በአኒሜሽን
 with st.sidebar:
     st.header("📋 EthioAi Menu")
     
-    # 🌐 የቋንቋ መምረጫ ምርጫ (English እና Amharic)
     language = st.radio("🌐 Choose Language / ቋንቋ ይምረጡ፦", ["English", "አማርኛ"])
     
     st.write("---")
@@ -76,23 +92,21 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
+# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር (በአኒሜሽን የተገነባ)
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
 
 if user_input:
-    # የተጠቃሚውን ጥያቄ ማሳየት እና ታሪክ ውስጥ መመዝገብ
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # 🖼️ የምስል ጥያቄ መሆኑን ማረጋገጫ (በሁለቱም ቋንቋ ይሰራል)
+    # የምስል ጥያቄ መሆኑን ማረጋገጫ
     is_image_request = any(word in user_input.lower() for word in ["image", "picture", "photo", "generate", "ምስል", "ስዕል", "ፎቶ"])
 
     if is_image_request:
         with st.chat_message("assistant"):
             with st.spinner("EthioAi is painting... / EthioAi ምስል እየሳለ ነው..."):
                 try:
-                    # ወደ እንግሊዘኛ ቀይሮ ለ Pollinations AI እንዲመች ማድረግ
                     current_key = GROQ_API_KEYS[st.session_state.key_index]
                     translate_payload = {
                         "model": "llama-3.3-70b-versatile",
@@ -109,16 +123,15 @@ if user_input:
                     
                     image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
                     
-                    # ምስሉን ማሳየት እና መመዝገብ
                     st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
                     st.session_state.messages.append({"role": "assistant", "content": image_url})
                 except Exception as e:
                     st.error("Failed to generate image. / ምስሉን መፍጠር አልተቻለም።")
 
-    # 💬 ተራ የጽሑፍ ጨዋታ ከሆነ (በተመረጠው ቋንቋ ይመልሳል)
+    # 💬 የጽሑፍ ጨዋታ (ስምህን Abel Teshome ብሎ እንዲጠራ የተደረገበት ክፍል)
     else:
         if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
-            st.error("Abel, please insert your Groq gsk API keys! / አቤል እባክህ የ Groq ኮድህን አስገባ!")
+            st.error("Abel, please insert your Groq gsk API keys!")
         else:
             with st.chat_message("assistant"):
                 with st.spinner("EthioAi is thinking... / እያሰበ ነው..."):
@@ -130,11 +143,11 @@ if user_input:
                             "Content-Type": "application/json"
                         }
                         
-                        # ቋንቋውን በምንመርጠው መሠረት ሲስተሙ ይቀይረዋል
+                        # 🚨 እዚህ ጋር ለ AIው ፈጣሪው አንተ (Abel Teshome) መሆንህን በግልጽ አስተምረነዋል!
                         if language == "አማርኛ":
-                            system_prompt = "You are EthioAi. You must respond in fluent, beautiful, and short Amharic language."
+                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
                         else:
-                            system_prompt = "You are EthioAi. You must respond in professional, clear, and short English language."
+                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Do not say Meta AI. Respond in short, clear, and perfect English language."
 
                         payload = {
                             "model": "llama-3.3-70b-versatile",
@@ -155,10 +168,10 @@ if user_input:
                             
                         elif response.status_code in [429, 401, 400]:
                             st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                            st.warning("Server line switching, please try again... / ሰርቨር እየተቀየረ ነው፣ እባክህ ድጋሚ ላከው...")
+                            st.warning("Server line switching, please try again...")
                         else:
                             st.error(f"Error Code: {response.status_code}")
                             
                     except Exception as e:
                         st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend. / የሰርቨር መገናኘት ችግር፣ እባክህ ድጋሚ ላከው።")
+                        st.error("Connection error, please resend.")
