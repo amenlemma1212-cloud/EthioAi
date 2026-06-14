@@ -1,9 +1,9 @@
 import streamlit as st
-import requests
+from groq import Groq
 from gtts import gTTS
 import os
 
-# 🎨 የገጹን ውበት፣ የማይክሮፎን አቀማመጥ እና የጽሑፍ አኒሜሽን በ CSS ማስተካከል
+# 🎨 የገጹን ውበት እና የጽሑፍ አኒሜሽን በ CSS ማስተካከል
 st.markdown(
     """
     <style>
@@ -11,54 +11,27 @@ st.markdown(
         background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1e293b 100%);
     }
     
-    /* ✨ 🎬 ጽሑፎች በቀስታ ከታች ወደ ላይ ብቅ እንዲሉ ማድረጊያ (Fade In and Up Animation) */
-    @keyframes fade-in-up {
-        0% {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    /* 🎬 ጽሑፎች በቀስታ ከታች ወደ ላይ ብቅ እንዲሉ ማድረጊያ አኒሜሽን */
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* አኒሜሽኑን በቻት መልእክቶች ላይ መጫን */
-    .stChatMessage {
-        animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        border-radius: 15px !important;
+    .animated-box {
+        animation: fadeInUp 0.5s ease-out forwards;
+        padding: 12px;
+        border-radius: 12px;
         margin-bottom: 10px;
+        color: white;
     }
     
-    [data-testid="stChatMessageUser"] {
-        background-color: #0ea5e9 !important;
-        color: white !important;
-    }
-    [data-testid="stChatMessageAssistant"] {
-        background-color: #1e293b !important;
-        border: 1px solid #334155 !important;
-    }
+    .user-box { background-color: #0ea5e9; }
+    .ai-box { background-color: #1e293b; border: 1px solid #334155; }
     
-    /* 🎨 የቻት ባር እና የማይክሮፎን ውህደት ዲዛይን */
-    div[data-testid="stChatInput"] {
-        border: 3px solid #38bdf8 !important;
-        border-radius: 25px !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4) !important;
-        padding: 5px !important;
-    }
-    
+    /* 🎨 የጽሕፈት ሳጥኑ ደማቅ ጥቁር ጽሑፍ እንዲሆን */
     div[data-testid="stChatInput"] textarea {
         color: #000000 !important;
-        font-size: 16px !important;
         font-weight: bold !important;
-        background-color: #ffffff !important;
-    }
-    
-    /* 🎙️ የማይክሮፎን ሳጥኑ ከቻት ባሩ ጋር በጣም ተቀራራቢ ሆኖ እንዲያምር */
-    .audio-container {
-        margin-bottom: -15px;
-        padding: 5px;
     }
     </style>
     """,
@@ -67,7 +40,7 @@ st.markdown(
 
 st.title("🤖 EthioAi")
 
-# 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል ማስገባትህን እንዳትረሳ!
+# 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
     "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",
     "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",
@@ -80,76 +53,64 @@ if "key_index" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# የቀድሞ የቻት ታሪኮችን ማሳያ
+# የቀድሞ የቻት ታሪኮችን በአኒሜሽን ማሳያ
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    box_class = "user-box" if message["role"] == "user" else "ai-box"
+    st.markdown(f'<div class="animated-box {box_class}">{message["content"]}</div>', unsafe_allow_html=True)
 
 user_input = ""
 
-# 🎙️ የድምፅ ሲስተም (አቀማመጡን ልክ ከቻት ባሩ ጎን/በላይ እንዲሆን አድርገነዋል)
-st.markdown('<div class="audio-container">', unsafe_allow_html=True)
-audio_value = st.audio_input("🎙️ በድምፅ ለመጠየቅ ማይኩን ይጫኑ")
-st.markdown('</div>', unsafe_allow_html=True)
+# 🎙️ 💬 የማይክሮፎን እና የቻት ባር ውህደት (ጎን ለጎን ተደርገዋል)
+col1, col2 = st.columns([1, 4])
 
+with col1:
+    audio_value = st.audio_input("🎙️") # ማይኩ አጠር ብሎ ከሳጥኑ ጎን ሆነ
+
+with col2:
+    chat_input = st.chat_input("እዚህ ጋር ይጻፉ...")
+
+# ጥያቄን መቀበያ
 if audio_value:
     user_input = "በድምፅ የተላከ መልእክት አለ (እባክህ እጅግ በጣም ጥራት ባለው አማርኛ ምላሽ ስጥ)"
-
-# 💬 የጽሕፈት ቻት ባር
-chat_input = st.chat_input("እዚህ ጋር በግልጽ ይጻፉ...")
-if chat_input:
+elif chat_input:
     user_input = chat_input
 
 if user_input:
-    with st.chat_message("user"):
-        st.markdown(user_input)
+    # የተጠቃሚውን ጥያቄ በአኒሜሽን ማሳየት
+    st.markdown(f'<div class="animated-box user-box">{user_input}</div>', unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
-        with st.chat_message("assistant"):
-            st.error("አቤል ወንድሜ፣ እባክህ የ Groq gsk API ኮድህን በGitHub ላይ ባለው ኮድ ውስጥ አስገባው!")
-            st.stop()
+        st.error("አቤል ወንድሜ፣ እባክህ የ Groq gsk API ኮድህን በኮዱ ውስጥ አስገባው!")
+        st.stop()
 
-    current_key = GROQ_API_KEYS[st.session_state.key_index]
-
-    headers = {
-        "Authorization": f"Bearer {current_key}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": "llama3-70b-8192",
-        "messages": [
-            {
-                "role": "system", 
-                "content": "You are EthioAi, a smart assistant created by Abel. You must respond in fluent, beautiful, and natural Amharic language. Speak clearly and like a real Ethiopian."
-            },
-            {"role": "user", "content": user_input}
-        ]
-    }
-
-    with st.chat_message("assistant"):
-        with st.spinner("EthioAi እያሰበ ነው..."):
-            try:
-                response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers, timeout=15)
-                
-                if response.status_code == 429 or response.status_code == 401:
-                    st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                    st.warning("EthioAi መስመሩን እየቀየረ ነው፣ እባክህ ድጋሚ ጥያቄህን ላከው...")
-                    st.stop()
-
-                data = response.json()
-                ai_response = data["choices"][0]["message"]["content"]
-                
-                st.markdown(ai_response)
-                st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                
-                # 🔊 የ AIው ድምፅ መልስ
-                tts = gTTS(text=ai_response, lang='am', slow=False)
-                audio_file = "response.mp3"
-                tts.save(audio_file)
-                st.audio(audio_file, format="audio/mp3")
-                
-            except Exception as e:
-                st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                st.error("ከGroq ሰርቨር ጋር መገናኘት አልተቻለም። እባክህ የ gsk ኮድህን በትክክል መጻፍህን አረጋግጥና ድጋሚ ሞክር።")
+    with st.spinner("EthioAi እያሰበ ነው..."):
+        try:
+            # 🚀 አዲሱ እና ፍጹሙ የ Groq አገናኝ ሲስተም
+            client = Groq(api_key=GROQ_API_KEYS[st.session_state.key_index])
+            
+            completion = client.chat.completions.create(
+                model="llama3-70b-8192",
+                messages=[
+                    {"role": "system", "content": "You are EthioAi, a smart assistant created by Abel. You must respond in fluent, beautiful, and natural Amharic language."},
+                    {"role": "user", "content": user_input}
+                ],
+                timeout=15
+            )
+            
+            ai_response = completion.choices[0].message.content
+            
+            # የ AIውን መልስ በአኒሜሽን ማሳየት
+            st.markdown(f'<div class="animated-box ai-box">{ai_response}</div>', unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            
+            # 🔊 የ AIው ድምፅ መልስ
+            tts = gTTS(text=ai_response, lang='am', slow=False)
+            audio_file = "response.mp3"
+            tts.save(audio_file)
+            st.audio(audio_file, format="audio/mp3")
+            
+        except Exception as e:
+            # ሰርቨሩ እምቢ ካለ ወደ ቀጣዩ የ gsk ኮድ ያዞረዋል
+            st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
+            st.error("መስመር ላይ ትንሽ መጨናነቅ አለ፣ እባክህ ድጋሚ ጥያቄህን ላከው ወንድሜ።")
