@@ -49,12 +49,6 @@ st.markdown(
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
     }
     
-    /* ⌨️ ቻት ባሩ ላይ ክሊክ ሲደረግ የሚመጣ አኒሜሽን */
-    div[data-testid="stChatInput"]:focus-within {
-        border: 3px solid #ef1c24 !important;
-        box-shadow: 0 0 20px rgba(254, 209, 0, 0.8) !important;
-    }
-    
     div[data-testid="stChatInput"] textarea {
         color: #000000 !important;
         font-size: 16px !important;
@@ -82,9 +76,17 @@ if "key_index" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 📂 የድሮ ቻቶች በታሪክነት የሚቀመጡበት ትልቅ ማህደር (Saved Sessions)
+# 📂 የድሮ ቻቶች ታሪክ ማህደር
 if "all_sessions" not in st.session_state:
     st.session_state.all_sessions = {}
+
+# 📌 የፒን የተደረጉ ቻቶች ዝርዝር
+if "pinned_sessions" not in st.session_state:
+    st.session_state.pinned_sessions = []
+
+# ⭐ የፌቨሪት የተደረጉ ቻቶች ዝርዝር
+if "favorite_sessions" not in st.session_state:
+    st.session_state.favorite_sessions = []
 
 # 👈 በግራ በኩል የቻት ታሪክ ማውጫ (Sidebar)
 with st.sidebar:
@@ -96,28 +98,74 @@ with st.sidebar:
     st.write("---")
     
     st.subheader("Chat Sessions")
-    # ➕ "New Chat" ሲጫን የአሁኑን ወሬ ሴቭ አድርጎ አዲስ ባዶ ገጽ ይከፍታል
+    # ➕ "New Chat" ሲጫን የአሁኑን ወሬ ሴቭ ያደርጋል
     if st.button("➕ New Chat"):
         if st.session_state.messages:
-            # የመጀመሪያዋን የተጠቃሚ ጥያቄ ለታሪኩ ስምነት እንጠቀምባታለን
             first_question = st.session_state.messages[0]["content"]
-            session_title = first_question[:25] + "..." if len(first_question) > 25 else first_question
+            session_title = first_question[:20] + "..." if len(first_question) > 20 else first_question
             
-            # ወሬውን ወደ ታሪክ ማህደር መጫን
-            st.session_state.all_sessions[session_title] = st.session_state.messages
+            # ልዩ ስም ለመስጠት በቁጥር ማጀብ (እንዳይደራረብ)
+            session_id = f"{session_title} ({len(st.session_state.all_sessions) + 1})"
+            st.session_state.all_sessions[session_id] = st.session_state.messages
             
-        st.session_state.messages = []  # የአሁኑን ገጽ ንጹህ ማድረግ
+        st.session_state.messages = []
         st.rerun()
 
-    # 💬 የድሮ የነበሩ ቻቶችን ማውጫ (History list)
+    # 📜 የቻት ታሪክ ማውጫ በቅደም ተከተል (Pin የተደረጉ መጀመሪያ ይመጣሉ)
     if st.session_state.all_sessions:
         st.write("---")
         st.subheader("📜 Chat History")
-        for title in list(st.session_state.all_sessions.keys()):
-            # የድሮውን ቻት መልሶ ለመክፈት የሚረዳ ቁልፍ
-            if st.button(f"💬 {title}", key=title):
+        
+        # ቻቶቹን ቅደም ተከተል ማስተካከያ (Pinned ቻቶች መጀመሪያ እንዲሰለፉ)
+        sorted_sessions = sorted(
+            st.session_state.all_sessions.keys(),
+            key=lambda k: k in st.session_state.pinned_sessions,
+            reverse=True
+        )
+        
+        for title in sorted_sessions:
+            # ምልክቶችን በስሙ አጠገብ ማሳያ
+            display_title = title
+            if title in st.session_state.pinned_sessions:
+                display_title = "📌 " + display_title
+            if title in st.session_state.favorite_sessions:
+                display_title = display_title + " ⭐"
+                
+            # በፎቶው ላይ እንዳለው በእያንዳንዱ መስመር ቻቱን መክፈቻ ቁልፍ
+            if st.button(f"💬 {display_title}", key=f"open_{title}"):
                 st.session_state.messages = st.session_state.all_sessions[title]
                 st.rerun()
+                
+            # 🛠️ ለታሪኩ ማስተካከያ ቁልፎች (Pin, Favorite, Delete) በጎንዮሽ መስመር
+            col_pin, col_fav, col_del = st.columns(3)
+            
+            with col_pin:
+                pin_label = "📍 Unpin" if title in st.session_state.pinned_sessions else "📌 Pin"
+                if st.button(pin_label, key=f"pin_{title}"):
+                    if title in st.session_state.pinned_sessions:
+                        st.session_state.pinned_sessions.remove(title)
+                    else:
+                        st.session_state.pinned_sessions.append(title)
+                    st.rerun()
+                    
+            with col_fav:
+                fav_label = "💛 Unfav" if title in st.session_state.favorite_sessions else "⭐ Fav"
+                if st.button(fav_label, key=f"fav_{title}"):
+                    if title in st.session_state.favorite_sessions:
+                        st.session_state.favorite_sessions.remove(title)
+                    else:
+                        st.session_state.favorite_sessions.append(title)
+                    st.rerun()
+                    
+            with col_del:
+                if st.button("🗑️ Delete", key=f"del_{title}"):
+                    del st.session_state.all_sessions[title]
+                    if title in st.session_state.pinned_sessions:
+                        st.session_state.pinned_sessions.remove(title)
+                    if title in st.session_state.favorite_sessions:
+                        st.session_state.favorite_sessions.remove(title)
+                    st.rerun()
+            st.write("---")
 
 # የቀድሞ የአሁኑን ቻት መልእክቶች በገጹ ላይ ማሳያ
 for message in st.session_state.messages:
