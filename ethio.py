@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🎨 የገጹን ውበት እና የግራውን ማውጫ ወደ Glassmorphism በ CSS ማስተካከል
+# 🎨 ያንተን ጽሑፍ ወደ ቀኝ፣ የ AIውን ወደ ግራ ማድረጊያ የ CSS ማስተካከያ
 st.markdown(
     """
     <style>
@@ -10,16 +10,15 @@ st.markdown(
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
     }
     
-    /* 🔮 👈 የቻት ታሪክ ማውጫውን (Sidebar) ሙሉ በሙሉ የብርጭቆ/የመስታወት (Glass) ማድረጊያ */
+    /* 🔮 የቻት ታሪክ ማውጫውን (Sidebar) የብርጭቆ/የመስታወት (Glass) ማድረጊያ */
     section[data-testid="stSidebar"] {
-        background: rgba(255, 255, 255, 0.15) !important; /* ግልጽ ነጭ */
-        backdrop-filter: blur(15px) !important; /* የበረዶ መስታወት ብዥታ */
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(15px) !important;
         -webkit-backdrop-filter: blur(15px) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.2) !important; /* የጠርዙ ማብሪያ */
+        border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
         box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* 📋 በማውጫው ውስጥ ያሉ ጽሑፎች በግልጽ እንዲታዩ ማድረጊያ */
     section[data-testid="stSidebar"] .stMarkdown, 
     section[data-testid="stSidebar"] h1, 
     section[data-testid="stSidebar"] h2, 
@@ -30,20 +29,29 @@ st.markdown(
         font-weight: bold !important;
     }
     
-    /* 🎬 መልእክቶች በቀስታ ብቅ እንዲሉ */
+    /* 🎬 የሳጥኖቹ አጠቃላይ ዲዛይን */
     .stChatMessage {
         border-radius: 15px !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        margin-bottom: 10px !important;
     }
     
-    /* 🌈 የመልእክት ሳጥኖች ዙሪያ ቀለም */
+    /* 🤖 👈 የ AIው መልእክት (Assistant) ወደ ግራ (Left) እንዲቀመጥ ማድረጊያ */
     div[data-testid="stChatMessageAssistant"] {
         border-left: 5px solid #fed100 !important;
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        margin-right: 20% !important;
+        margin-left: 0% !important;
     }
+    
+    /* 👤 👉 ያንተ መልእክት (User) ወደ ቀኝ (Right) እንዲቀመጥ ማድረጊያ */
     div[data-testid="stChatMessageUser"] {
-        border-left: 5px solid #009c3a !important;
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        border-right: 5px solid #009c3a !important;
+        border-left: none !important;
+        background-color: rgba(240, 248, 255, 0.95) !important;
+        margin-left: 20% !important;
+        margin-right: 0% !important;
+        text-align: left !important;
     }
     
     /* ➕ "New Chat" ማራኪ ሰማያዊ ቁልፍ */
@@ -84,9 +92,7 @@ st.title("🇪🇹 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
-    "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",
-    "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",
-    "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"
+    "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",     "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",     "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"
 ]
 
 if "key_index" not in st.session_state:
@@ -104,7 +110,7 @@ if "pinned_sessions" not in st.session_state:
 if "favorite_sessions" not in st.session_state:
     st.session_state.favorite_sessions = []
 
-# 👈 በግራ በኩል ያለው ማውጫ (የመስታወት ጀርባ አሁን አለው)
+# 👈 የቻት ታሪክ ማውጫ (Sidebar)
 with st.sidebar:
     st.header("📋 EthioAi Menu")
     
@@ -182,7 +188,7 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# 💬 ቻት ባር
+# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
 
 if user_input:
