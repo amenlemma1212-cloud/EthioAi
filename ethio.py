@@ -264,4 +264,4 @@ if user_input:
                             st.error(f"Error Code: {response.status_code}")
                     except Exception as e:
                         st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend.")
+                        st.error("Connection error, please resend.") 
