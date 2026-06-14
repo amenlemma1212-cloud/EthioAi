@@ -1,13 +1,33 @@
 import streamlit as st
 import requests
 
-# 🎨 የገጹን ውበት ልክ በፎቶው ላይ እንዳለው በ CSS ማስተካከል
+# 🎨 የገጹን ውበት እና የግራውን ማውጫ ወደ Glassmorphism በ CSS ማስተካከል
 st.markdown(
     """
     <style>
     /* 🇪🇹 የኢትዮጵያ ሰንደቅ ዓላማ Gradient ጀርባ */
     .stApp {
         background: linear-gradient(135deg, #009c3a 0%, #fed100 50%, #ef1c24 100%) !important;
+    }
+    
+    /* 🔮 👈 የቻት ታሪክ ማውጫውን (Sidebar) ሙሉ በሙሉ የብርጭቆ/የመስታወት (Glass) ማድረጊያ */
+    section[data-testid="stSidebar"] {
+        background: rgba(255, 255, 255, 0.15) !important; /* ግልጽ ነጭ */
+        backdrop-filter: blur(15px) !important; /* የበረዶ መስታወት ብዥታ */
+        -webkit-backdrop-filter: blur(15px) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.2) !important; /* የጠርዙ ማብሪያ */
+        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* 📋 በማውጫው ውስጥ ያሉ ጽሑፎች በግልጽ እንዲታዩ ማድረጊያ */
+    section[data-testid="stSidebar"] .stMarkdown, 
+    section[data-testid="stSidebar"] h1, 
+    section[data-testid="stSidebar"] h2, 
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] label {
+        color: #ffffff !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.3) !important;
+        font-weight: bold !important;
     }
     
     /* 🎬 መልእክቶች በቀስታ ብቅ እንዲሉ */
@@ -72,51 +92,41 @@ GROQ_API_KEYS = [
 if "key_index" not in st.session_state:
     st.session_state.key_index = 0
 
-# 🔄 የአሁኑ ቻት መልእክቶች ማከማቻ
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 📂 የድሮ ቻቶች ታሪክ ማህደር
 if "all_sessions" not in st.session_state:
     st.session_state.all_sessions = {}
 
-# 📌 የፒን የተደረጉ ቻቶች ዝርዝር
 if "pinned_sessions" not in st.session_state:
     st.session_state.pinned_sessions = []
 
-# ⭐ የፌቨሪት የተደረጉ ቻቶች ዝርዝር
 if "favorite_sessions" not in st.session_state:
     st.session_state.favorite_sessions = []
 
-# 👈 በግራ በኩል የቻት ታሪክ ማውጫ (Sidebar)
+# 👈 በግራ በኩል ያለው ማውጫ (የመስታወት ጀርባ አሁን አለው)
 with st.sidebar:
     st.header("📋 EthioAi Menu")
     
-    # 🌐 የቋንቋ መምረጫ
     language = st.radio("🌐 Choose Language / ቋንቋ ይምረጡ፦", ["English", "አማርኛ"])
     
     st.write("---")
     
     st.subheader("Chat Sessions")
-    # ➕ "New Chat" ሲጫን የአሁኑን ወሬ ሴቭ ያደርጋል
     if st.button("➕ New Chat"):
         if st.session_state.messages:
             first_question = st.session_state.messages[0]["content"]
             session_title = first_question[:20] + "..." if len(first_question) > 20 else first_question
-            
-            # ልዩ ስም ለመስጠት በቁጥር ማጀብ (እንዳይደራረብ)
             session_id = f"{session_title} ({len(st.session_state.all_sessions) + 1})"
             st.session_state.all_sessions[session_id] = st.session_state.messages
             
         st.session_state.messages = []
         st.rerun()
 
-    # 📜 የቻት ታሪክ ማውጫ በቅደም ተከተል (Pin የተደረጉ መጀመሪያ ይመጣሉ)
     if st.session_state.all_sessions:
         st.write("---")
         st.subheader("📜 Chat History")
         
-        # ቻቶቹን ቅደም ተከተል ማስተካከያ (Pinned ቻቶች መጀመሪያ እንዲሰለፉ)
         sorted_sessions = sorted(
             st.session_state.all_sessions.keys(),
             key=lambda k: k in st.session_state.pinned_sessions,
@@ -124,19 +134,16 @@ with st.sidebar:
         )
         
         for title in sorted_sessions:
-            # ምልክቶችን በስሙ አጠገብ ማሳያ
             display_title = title
             if title in st.session_state.pinned_sessions:
                 display_title = "📌 " + display_title
             if title in st.session_state.favorite_sessions:
                 display_title = display_title + " ⭐"
                 
-            # በፎቶው ላይ እንዳለው በእያንዳንዱ መስመር ቻቱን መክፈቻ ቁልፍ
             if st.button(f"💬 {display_title}", key=f"open_{title}"):
                 st.session_state.messages = st.session_state.all_sessions[title]
                 st.rerun()
                 
-            # 🛠️ ለታሪኩ ማስተካከያ ቁልፎች (Pin, Favorite, Delete) በጎንዮሽ መስመር
             col_pin, col_fav, col_del = st.columns(3)
             
             with col_pin:
@@ -167,7 +174,7 @@ with st.sidebar:
                     st.rerun()
             st.write("---")
 
-# የቀድሞ የአሁኑን ቻት መልእክቶች በገጹ ላይ ማሳያ
+# የቀድሞ መልእክቶች ማሳያ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
@@ -175,7 +182,7 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
+# 💬 ቻት ባር
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
 
 if user_input:
@@ -183,7 +190,6 @@ if user_input:
         st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # የምስል ጥያቄ መሆኑን ማረጋገጫ
     is_image_request = any(word in user_input.lower() for word in ["image", "picture", "photo", "generate", "ምስል", "ስዕል", "ፎቶ"])
 
     if is_image_request:
@@ -211,7 +217,6 @@ if user_input:
                 except Exception as e:
                     st.error("Failed to generate image.")
 
-    # 💬 የጽሑፍ ጨዋታ (ፈጣሪው Abel Teshome መሆኑን የሚያረጋግጠው ክፍል)
     else:
         if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
             st.error("Abel, please insert your Groq gsk API keys!")
@@ -244,16 +249,13 @@ if user_input:
                         if response.status_code == 200:
                             data = response.json()
                             ai_response = data["choices"][0]["message"]["content"]
-                            
                             st.markdown(ai_response)
                             st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                            
                         elif response.status_code in [429, 401, 400]:
                             st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
                             st.warning("Server line switching, please try again...")
                         else:
                             st.error(f"Error Code: {response.status_code}")
-                            
                     except Exception as e:
                         st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
                         st.error("Connection error, please resend.")
