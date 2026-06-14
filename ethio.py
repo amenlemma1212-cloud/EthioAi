@@ -76,9 +76,9 @@ st.title("🤖 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ እዚህ ጥቅስ ውስጥ ያንተን 3 የ gsk ኮዶች ማስገባትህን ፍጹም እንዳትረሳ!
 GROQ_API_KEYS = [
-    "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",
-    "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",
-    "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"
+    "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",
+    "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",
+    "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"
 ]
 
 if "key_index" not in st.session_state:
