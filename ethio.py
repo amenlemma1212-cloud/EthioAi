@@ -224,4 +224,77 @@ with st.popover("⋮ More Options (Video, Image, Audio)", use_container_width=Tr
             st.audio(uploaded_audio)
             if st.button("Send Audio", use_container_width=True, key="send_audio"):
                 st.session_state.messages.append({"role": "user", "content": "[Audio Uploaded]"})
-                st.session_state.messages.append({"role": "assistant", "content": "Audio file received in my memory!
+                st.session_state.messages.append({"role": "assistant", "content": "Audio file received in my memory! 🎤"})
+                st.toast("Audio shared successfully! 🎤")
+                st.rerun()
+
+# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
+user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
+
+if user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    is_image_request = any(word in user_input.lower() for word in ["image", "picture", "photo", "generate", "ምስል", "ስዕል", "ፎቶ"])
+
+    if is_image_request:
+        with st.chat_message("assistant"):
+            with st.spinner("EthioAi ምስል እየሳለ ነው..."):
+                try:
+                    clean_prompt = user_input.replace(" ", "%20")
+                    image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
+                    st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
+                    st.session_state.messages.append({"role": "assistant", "content": image_url})
+                except Exception as e:
+                    st.error("Failed to generate image.")
+
+    else:
+        if "እዚህ_ይግባ" in OPENROUTER_API_KEYS[0] or OPENROUTER_API_KEYS[0] == "":
+            st.error("Abel, please insert your OpenRouter API keys!")
+        else:
+            with st.chat_message("assistant"):
+                with st.spinner("EthioAi is thinking..."):
+                    
+                    response_success = False
+                    attempts = 0
+                    
+                    while not response_success and attempts < len(OPENROUTER_API_KEYS):
+                        try:
+                            current_key = OPENROUTER_API_KEYS[st.session_state.key_index]
+                            url = "https://openrouter.ai/api/v1/chat/completions"
+                            headers = {
+                                "Authorization": f"Bearer {current_key}",
+                                "Content-Type": "application/json"
+                            }
+                            
+                            if language == "አማርኛ":
+                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
+                            else:
+                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
+
+                            payload = {
+                                "model": "meta-llama/llama-3-8b-instruct:free",
+                                "messages": [
+                                    {"role": "system", "content": system_prompt},
+                                    {"role": "user", "content": user_input}
+                                ]
+                            }
+                            
+                            response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
+                            
+                            if response.status_code == 200:
+                                data = response.json()
+                                ai_response = data["choices"][0]["message"]["content"]
+                                st.markdown(ai_response)
+                                st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                                response_success = True
+                            else:
+                                st.session_state.key_index = (st.session_state.key_index + 1) % len(OPENROUTER_API_KEYS)
+                                attempts += 1
+                        except Exception as e:
+                            st.session_state.key_index = (st.session_state.key_index + 1) % len(OPENROUTER_API_KEYS)
+                            attempts += 1
+                    
+                    if not response_success:
+                        st.error("All server lines are busy. Please check your OpenRouter Keys or try again later!")
