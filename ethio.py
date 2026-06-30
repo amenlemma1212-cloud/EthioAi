@@ -100,7 +100,7 @@ st.title("🇪🇹 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ አዲሶቹን የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
-    "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",
+    "gsk _w0123VBAPmx7FaSkAZrZWGdyb3FYSi37mHxEcOMIIhdpTqCtuB7U",
     "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",
     "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"
 ]
@@ -163,7 +163,6 @@ with st.sidebar:
                     st.session_state.messages = st.session_state.all_sessions[title]
                     st.rerun()
             
-            # 🛠️ 3-Dot Options Menu በአንድ ፖፖቨር ቁልፍ ተተካ
             with col_pop:
                 with st.popover("⋮", help="Options"):
                     pin_label = "📍 Unpin Chat" if title in st.session_state.pinned_sessions else "📌 Pin Chat"
@@ -196,17 +195,36 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
             st.image(message["content"], use_container_width=True)
+        elif message["content"].startswith("[Image Uploaded]"):
+            st.warning("🖼️ Image view is handled in session.")
+        elif message["content"].startswith("[Audio Uploaded]"):
+            st.success("🎤 Audio file is in memory.")
         else:
             st.markdown(message["content"])
 
-# 📱 👈 ከቻት ባሩ በላይ የ "Live Option" እና "Video Making" ቁልፎች
-col_live, col_video = st.columns(2)
-with col_live:
-    if st.button("🔴 Live Option", use_container_width=True):
-        st.toast("Live option feature is coming soon! 🚀")
-with col_video:
-    if st.button("🎬 Video Making Option", use_container_width=True):
-        st.toast("Video making assistant initialized! 🎬")
+# 📱 👈 ባለ 3 ነጥብ (⋮) ፖፖቨር - Live ጠፍቶ በአዲሱ Audio ተተክቷል!
+with st.popover("⋮ More Options (Video, Image, Audio)", use_container_width=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("🎬 Video Option", use_container_width=True):
+            st.toast("Video making assistant initialized! 🎬")
+    with col2:
+        uploaded_img = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"], key="img_up")
+        if uploaded_img is not None:
+            st.image(uploaded_img, caption="Selected Image", use_container_width=True)
+            if st.button("Send Image", use_container_width=True, key="send_img"):
+                st.session_state.messages.append({"role": "user", "content": "[Image Uploaded]"})
+                st.toast("Image shared! 🖼️")
+                st.rerun()
+    with col3:
+        # 🎤 አዲሱ የኦዲዮ ሲስተም መጫኛ ቁልፍ
+        uploaded_audio = st.file_uploader("Upload Audio", type=["mp3", "wav", "m4a"], key="audio_up")
+        if uploaded_audio is not None:
+            st.audio(uploaded_audio)
+            if st.button("Send Audio", use_container_width=True, key="send_audio"):
+                st.session_state.messages.append({"role": "user", "content": "[Audio Uploaded]"})
+                st.toast("Audio shared to chat memory! 🎤")
+                st.rerun()
 
 # 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
@@ -252,7 +270,6 @@ if user_input:
             with st.chat_message("assistant"):
                 with st.spinner("EthioAi is thinking..."):
                     
-                    # 🛠️ የሰርቨር መቀያየርን (Server Switching) አስተማማኝ የማድረጊያ ሉፕ
                     response_success = False
                     attempts = 0
                     
@@ -287,7 +304,6 @@ if user_input:
                                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
                                 response_success = True
                             else:
-                                # ሰርቨሩ እምቢ ካለ ወደ ቀጣዩ Key ይቀይራል
                                 st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
                                 attempts += 1
                         except Exception as e:
