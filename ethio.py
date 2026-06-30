@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🎨 የገጹን ውበት፣ የብርጭቆ ማውጫ፣ የኩርባ ቅርጽ እና አቅጣጫን ያቀፈው የመጨረሻው CSS
+# 🎨 CSS ማስተካከያ - የብርጭቆ ማውጫ፣ የኩርባ ቅርጾች እና የጽሑፍ አቅጣጫ
 st.markdown(
     """
     <style>
@@ -98,11 +98,9 @@ st.markdown(
 
 st.title("🇪🇹 EthioAi")
 
-# 🚨 አቤል ወንድሜ፣ 3ቱንም የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
+# 🚨 አቤል ወንድሜ፣ አዲሶቹን የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
-    "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",
-    "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",
-    "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"
+"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","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","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"
 ]
 
 if "key_index" not in st.session_state:
@@ -155,39 +153,40 @@ with st.sidebar:
                 display_title = "📌 " + display_title
             if title in st.session_state.favorite_sessions:
                 display_title = display_title + " ⭐"
-                
-            if st.button(f"💬 {display_title}", key=f"open_{title}"):
-                st.session_state.messages = st.session_state.all_sessions[title]
-                st.rerun()
-                
-            col_pin, col_fav, col_del = st.columns(3)
             
-            with col_pin:
-                pin_label = "📍 Unpin" if title in st.session_state.pinned_sessions else "📌 Pin"
-                if st.button(pin_label, key=f"pin_{title}"):
-                    if title in st.session_state.pinned_sessions:
-                        st.session_state.pinned_sessions.remove(title)
-                    else:
-                        st.session_state.pinned_sessions.append(title)
+            col_btn, col_pop = st.columns([4, 1])
+            
+            with col_btn:
+                if st.button(f"💬 {display_title}", key=f"open_{title}", use_container_width=True):
+                    st.session_state.messages = st.session_state.all_sessions[title]
                     st.rerun()
-                    
-            with col_fav:
-                fav_label = "💛 Unfav" if title in st.session_state.favorite_sessions else "⭐ Fav"
-                if st.button(fav_label, key=f"fav_{title}"):
-                    if title in st.session_state.favorite_sessions:
-                        st.session_state.favorite_sessions.remove(title)
-                    else:
-                        st.session_state.favorite_sessions.append(title)
-                    st.rerun()
-                    
-            with col_del:
-                if st.button("🗑️ Delete", key=f"del_{title}"):
-                    del st.session_state.all_sessions[title]
-                    if title in st.session_state.pinned_sessions:
-                        st.session_state.pinned_sessions.remove(title)
-                    if title in st.session_state.favorite_sessions:
-                        st.session_state.favorite_sessions.remove(title)
-                    st.rerun()
+            
+            # 🛠️ 3-Dot Options Menu በአንድ ፖፖቨር ቁልፍ ተተካ
+            with col_pop:
+                with st.popover("⋮", help="Options"):
+                    pin_label = "📍 Unpin Chat" if title in st.session_state.pinned_sessions else "📌 Pin Chat"
+                    if st.button(pin_label, key=f"pin_{title}", use_container_width=True):
+                        if title in st.session_state.pinned_sessions:
+                            st.session_state.pinned_sessions.remove(title)
+                        else:
+                            st.session_state.pinned_sessions.append(title)
+                        st.rerun()
+                        
+                    fav_label = "💛 Unfavorite" if title in st.session_state.favorite_sessions else "⭐ Favorite"
+                    if st.button(fav_label, key=f"fav_{title}", use_container_width=True):
+                        if title in st.session_state.favorite_sessions:
+                            st.session_state.favorite_sessions.remove(title)
+                        else:
+                            st.session_state.favorite_sessions.append(title)
+                        st.rerun()
+                        
+                    if st.button("🗑️ Delete Chat", key=f"del_{title}", use_container_width=True):
+                        del st.session_state.all_sessions[title]
+                        if title in st.session_state.pinned_sessions:
+                            st.session_state.pinned_sessions.remove(title)
+                        if title in st.session_state.favorite_sessions:
+                            st.session_state.favorite_sessions.remove(title)
+                        st.rerun()
             st.write("---")
 
 # የቀድሞ መልእክቶች ማሳያ
@@ -197,6 +196,15 @@ for message in st.session_state.messages:
             st.image(message["content"], use_container_width=True)
         else:
             st.markdown(message["content"])
+
+# 📱 👈 ከቻት ባሩ በላይ የ "Live Option" እና "Video Making" ቁልፎች
+col_live, col_video = st.columns(2)
+with col_live:
+    if st.button("🔴 Live Option", use_container_width=True):
+        st.toast("Live option feature is coming soon! 🚀")
+with col_video:
+    if st.button("🎬 Video Making Option", use_container_width=True):
+        st.toast("Video making assistant initialized! 🎬")
 
 # 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
 user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
@@ -222,7 +230,6 @@ if user_input:
                     }
                     headers = {"Authorization": f"Bearer {current_key}", "Content-Type": "application/json"}
                     
-                    # 🛠️ እንዳይቆራረጥ ሊንኩን በአጭሩ አስቀምጠነዋል
                     groq_url = "https://api.groq.com/openai/v1/chat/completions"
                     trans_res = requests.post(groq_url, json=translate_payload, headers=headers)
                     
@@ -242,39 +249,48 @@ if user_input:
         else:
             with st.chat_message("assistant"):
                 with st.spinner("EthioAi is thinking..."):
-                    try:
-                        current_key = GROQ_API_KEYS[st.session_state.key_index]
-                        url = "https://api.groq.com/openai/v1/chat/completions"
-                        headers = {
-                            "Authorization": f"Bearer {current_key}",
-                            "Content-Type": "application/json"
-                        }
-                        
-                        if language == "አማርኛ":
-                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
-                        else:
-                            system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
+                    
+                    # 🛠️ የሰርቨር መቀያየርን (Server Switching) አስተማማኝ የማድረጊያ ሉፕ
+                    response_success = False
+                    attempts = 0
+                    
+                    while not response_success and attempts < len(GROQ_API_KEYS):
+                        try:
+                            current_key = GROQ_API_KEYS[st.session_state.key_index]
+                            url = "https://api.groq.com/openai/v1/chat/completions"
+                            headers = {
+                                "Authorization": f"Bearer {current_key}",
+                                "Content-Type": "application/json"
+                            }
+                            
+                            if language == "አማርኛ":
+                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
+                            else:
+                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
 
-                        payload = {
-                            "model": "llama-3.3-70b-versatile",
-                            "messages": [
-                                {"role": "system", "content": system_prompt},
-                                {"role": "user", "content": user_input}
-                            ]
-                        }
-                        
-                        response = requests.post(url, json=payload, headers=headers, timeout=15)
-                        
-                        if response.status_code == 200:
-                            data = response.json()
-                            ai_response = data["choices"][0]["message"]["content"]
-                            st.markdown(ai_response)
-                            st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                        elif response.status_code in [429, 401, 400]:
+                            payload = {
+                                "model": "llama-3.3-70b-versatile",
+                                "messages": [
+                                    {"role": "system", "content": system_prompt},
+                                    {"role": "user", "content": user_input}
+                                ]
+                            }
+                            
+                            response = requests.post(url, json=payload, headers=headers, timeout=10)
+                            
+                            if response.status_code == 200:
+                                data = response.json()
+                                ai_response = data["choices"][0]["message"]["content"]
+                                st.markdown(ai_response)
+                                st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                                response_success = True
+                            else:
+                                # ሰርቨሩ እምቢ ካለ ወደ ቀጣዩ Key ይቀይራል
+                                st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
+                                attempts += 1
+                        except Exception as e:
                             st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                            st.warning("Server line switching, please try again...")
-                        else:
-                            st.error(f"Error Code: {response.status_code}")
-                    except Exception as e:
-                        st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                        st.error("Connection error, please resend.")
+                            attempts += 1
+                    
+                    if not response_success:
+                        st.error("All server lines are busy. Please check your API Keys or try again later!")
