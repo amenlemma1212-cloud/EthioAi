@@ -100,7 +100,9 @@ st.title("🇪🇹 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ አዲሶቹን የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
 GROQ_API_KEYS = [
-"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","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","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"
+    "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",
+    "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",
+    "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"
 ]
 
 if "key_index" not in st.session_state:
