@@ -195,4 +195,4 @@ with st.sidebar:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
-            st.image(message["content"], use_container_width
+            st.image(message["content"], use_container_width)
