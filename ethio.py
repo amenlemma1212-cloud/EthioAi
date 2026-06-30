@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import json
 
 # 🎨 CSS ማስተካከያ - የብርጭቆ ማውጫ፣ የኩርባ ቅርጾች እና የጽሑፍ አቅጣጫ
 st.markdown(
@@ -98,11 +99,11 @@ st.markdown(
 
 st.title("🇪🇹 EthioAi")
 
-# 🚨 አቤል ወንድሜ፣ አዲሶቹን የ gsk ኮዶችህን እዚህ ጥቅስ ውስጥ በትክክል አስገባቸው!
-GROQ_API_KEYS = [
-    "gsk _w0123VBAPmx7FaSkAZrZWGdyb3FYSi37mHxEcOMIIhdpTqCtuB7U",
-    "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",
-    "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"
+# 🚨 አቤል ወንድሜ፣ 3ቱን የ OpenRouter (sk-or-...) ኮዶችህን እዚህ ጥቅስ ውስጥ በቅደም ተከተል አስገባቸው!
+OPENROUTER_API_KEYS = [
+    "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",
+    "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",
+    "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"
 ]
 
 if "key_index" not in st.session_state:
@@ -194,121 +195,4 @@ with st.sidebar:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
-            st.image(message["content"], use_container_width=True)
-        elif message["content"].startswith("[Image Uploaded]"):
-            st.warning("🖼️ Image view is handled in session.")
-        elif message["content"].startswith("[Audio Uploaded]"):
-            st.success("🎤 Audio file is in memory.")
-        else:
-            st.markdown(message["content"])
-
-# 📱 👈 ባለ 3 ነጥብ (⋮) ፖፖቨር - Live ጠፍቶ በአዲሱ Audio ተተክቷል!
-with st.popover("⋮ More Options (Video, Image, Audio)", use_container_width=True):
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("🎬 Video Option", use_container_width=True):
-            st.toast("Video making assistant initialized! 🎬")
-    with col2:
-        uploaded_img = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"], key="img_up")
-        if uploaded_img is not None:
-            st.image(uploaded_img, caption="Selected Image", use_container_width=True)
-            if st.button("Send Image", use_container_width=True, key="send_img"):
-                st.session_state.messages.append({"role": "user", "content": "[Image Uploaded]"})
-                st.toast("Image shared! 🖼️")
-                st.rerun()
-    with col3:
-        # 🎤 አዲሱ የኦዲዮ ሲስተም መጫኛ ቁልፍ
-        uploaded_audio = st.file_uploader("Upload Audio", type=["mp3", "wav", "m4a"], key="audio_up")
-        if uploaded_audio is not None:
-            st.audio(uploaded_audio)
-            if st.button("Send Audio", use_container_width=True, key="send_audio"):
-                st.session_state.messages.append({"role": "user", "content": "[Audio Uploaded]"})
-                st.toast("Audio shared to chat memory! 🎤")
-                st.rerun()
-
-# 💬 የታችኛው ዘመናዊ የጽሕፈት ቻት ባር
-user_input = st.chat_input("Type your message here / እዚህ ጋር ይጻፉ...")
-
-if user_input:
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    st.session_state.messages.append({"role": "user", "content": user_input})
-
-    is_image_request = any(word in user_input.lower() for word in ["image", "picture", "photo", "generate", "ምስል", "ስዕል", "ፎቶ"])
-
-    if is_image_request:
-        with st.chat_message("assistant"):
-            with st.spinner("EthioAi ምስል እየሳለ ነው..."):
-                try:
-                    current_key = GROQ_API_KEYS[st.session_state.key_index]
-                    translate_payload = {
-                        "model": "llama-3.3-70b-versatile",
-                        "messages": [
-                            {"role": "system", "content": "Translate the user prompt into a short English image generation prompt. Only return the English translation, nothing else."},
-                            {"role": "user", "content": user_input}
-                        ]
-                    }
-                    headers = {"Authorization": f"Bearer {current_key}", "Content-Type": "application/json"}
-                    
-                    groq_url = "https://api.groq.com/openai/v1/chat/completions"
-                    trans_res = requests.post(groq_url, json=translate_payload, headers=headers)
-                    
-                    image_prompt = trans_res.json()["choices"][0]["message"]["content"] if trans_res.status_code == 200 else user_input
-                    clean_prompt = image_prompt.replace(" ", "%20")
-                    
-                    image_url = f"https://image.pollinations.ai/p/{clean_prompt}?width=1024&height=1024&seed=42&enhanced=true"
-                    
-                    st.image(image_url, caption=f"🎬 Generated Image: {user_input}", use_container_width=True)
-                    st.session_state.messages.append({"role": "assistant", "content": image_url})
-                except Exception as e:
-                    st.error("Failed to generate image.")
-
-    else:
-        if "እዚህ_ይግባ" in GROQ_API_KEYS[0] or GROQ_API_KEYS[0] == "":
-            st.error("Abel, please insert your Groq gsk API keys!")
-        else:
-            with st.chat_message("assistant"):
-                with st.spinner("EthioAi is thinking..."):
-                    
-                    response_success = False
-                    attempts = 0
-                    
-                    while not response_success and attempts < len(GROQ_API_KEYS):
-                        try:
-                            current_key = GROQ_API_KEYS[st.session_state.key_index]
-                            url = "https://api.groq.com/openai/v1/chat/completions"
-                            headers = {
-                                "Authorization": f"Bearer {current_key}",
-                                "Content-Type": "application/json"
-                            }
-                            
-                            if language == "አማርኛ":
-                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short and beautiful Amharic language."
-                            else:
-                                system_prompt = "You are EthioAi, a smart assistant created only by Abel Teshome. If anyone asks who created you or who made you, you must answer proudly that you were created by Abel Teshome. Respond in short, clear, and perfect English language."
-
-                            payload = {
-                                "model": "llama-3.3-70b-versatile",
-                                "messages": [
-                                    {"role": "system", "content": system_prompt},
-                                    {"role": "user", "content": user_input}
-                                ]
-                            }
-                            
-                            response = requests.post(url, json=payload, headers=headers, timeout=10)
-                            
-                            if response.status_code == 200:
-                                data = response.json()
-                                ai_response = data["choices"][0]["message"]["content"]
-                                st.markdown(ai_response)
-                                st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                                response_success = True
-                            else:
-                                st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                                attempts += 1
-                        except Exception as e:
-                            st.session_state.key_index = (st.session_state.key_index + 1) % len(GROQ_API_KEYS)
-                            attempts += 1
-                    
-                    if not response_success:
-                        st.error("All server lines are busy. Please check your API Keys or try again later!")
+            st.image(message["content"], use_container_width
