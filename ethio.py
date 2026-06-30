@@ -6,9 +6,9 @@ st.title("🇪🇹 EthioAi")
 
 # 🚨 አቤል ወንድሜ፣ 3ቱን የ OpenRouter (sk-or-...) ኮዶችህን እዚህ ጥቅስ ውስጥ አስገባቸው!
 OPENROUTER_API_KEYS = [
-    "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",
-    "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",
-    "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"
+    " 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 ",
+    " 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 ",
+    " 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 "
 ]
 
 if "key_index" not in st.session_state:
