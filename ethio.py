@@ -195,4 +195,33 @@ with st.sidebar:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["content"].startswith("http"):
-            st.image(message["content"], use_container_width)
+            st.image(message["content"], use_container_width=True)
+        elif message["content"].startswith("[Image Uploaded]"):
+            st.info("🖼️ Image received by EthioAi!")
+        elif message["content"].startswith("[Audio Uploaded]"):
+            st.success("🎤 Audio file is in memory.")
+        else:
+            st.markdown(message["content"])
+
+# 📱 👈 ባለ 3 ነጥብ (⋮) ፖፖቨር - Video, Image, Audio
+with st.popover("⋮ More Options (Video, Image, Audio)", use_container_width=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("🎬 Video Option", use_container_width=True):
+            st.toast("Video making assistant initialized! 🎬")
+    with col2:
+        uploaded_img = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"], key="img_up")
+        if uploaded_img is not None:
+            st.image(uploaded_img, caption="Selected Image", use_container_width=True)
+            if st.button("Send Image", use_container_width=True, key="send_img"):
+                st.session_state.messages.append({"role": "user", "content": "[Image Uploaded]"})
+                st.session_state.messages.append({"role": "assistant", "content": "I have received your image, Abel! How can I help you with this photo?"})
+                st.toast("Image shared successfully! 🖼️")
+                st.rerun()
+    with col3:
+        uploaded_audio = st.file_uploader("Upload Audio", type=["mp3", "wav", "m4a"], key="audio_up")
+        if uploaded_audio is not None:
+            st.audio(uploaded_audio)
+            if st.button("Send Audio", use_container_width=True, key="send_audio"):
+                st.session_state.messages.append({"role": "user", "content": "[Audio Uploaded]"})
+                st.session_state.messages.append({"role": "assistant", "content": "Audio file received in my memory!
