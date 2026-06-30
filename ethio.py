@@ -31,47 +31,4 @@ st.markdown(
     }
     div[data-testid="stChatInput"] {
         border: 3px solid #009c3a !important;
-        border-radius: 35px !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.title("🇪🇹 EthioAi")
-
-# 🚨 አቤል ወንድሜ፣ 3ቱን የ OpenRouter (sk-or-...) ኮዶችህን እዚህ ጥቅስ ውስጥ በቅደም ተከተል አስገባቸው!
-OPENROUTER_API_KEYS = [
-    "የመጀመሪያው_sk-or-_ኮድ_እዚህ_ይግባ",
-    "ሁለተኛው_sk-or-_ኮድ_እዚህ_ይግባ",
-    "ሦስተኛው_sk-or-_ኮድ_እዚህ_ይግባ"
-]
-
-if "key_index" not in st.session_state:
-    st.session_state.key_index = 0
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "all_sessions" not in st.session_state:
-    st.session_state.all_sessions = {}
-
-if "pinned_sessions" not in st.session_state:
-    st.session_state.pinned_sessions = []
-
-if "favorite_sessions" not in st.session_state:
-    st.session_state.favorite_sessions = []
-
-# 👈 የቻት ታሪክ ማውጫ (Sidebar)
-with st.sidebar:
-    st.header("📋 EthioAi Menu")
-    language = st.radio("🌐 Choose Language / ቋንቋ ይምረጡ፦", ["English", "አማርኛ"])
-    st.write("---")
-    
-    st.subheader("Chat Sessions")
-    if st.button("➕ New Chat"):
-        if st.session_state.messages:
-            first_question = st.session_state.messages[0]["content"]
-            session_title = first_question[:20] + "..." if len(first_question) > 20 else first_question
-            session_id = f"{session_title} ({len(st.session_state.all_sessions) + 1})"
-            st.session_state.all_sessions[session_id] = st.
+        border
