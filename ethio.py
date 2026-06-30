@@ -27,9 +27,3 @@ st.markdown(
     section[data-testid="stSidebar"] label {
         color: #ffffff !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.3) !important;
-        font-weight: bold !important;
-    }
-    
-    /* 🤖 🔄 ሮቦት (AI) text -> ወደ ቀኝ (Right) እና በጣም ክብ የኩርባ ጠርዝ */
-    div[data-testid="stChatMessageAssistant"] {
-        border-right: 5px solid #fed1
